@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-v(ka$lr(c2qq@drkk$$4rg#ths8o7_@6$db(4f#lmz9t^kn1!p
 DEBUG = True
 
 import os
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', os.getenv('RENDER_EXTERNAL_HOSTNAME', 'vereinswebsite.onrender.com')]
+ALLOWED_HOSTS = ['.onrender.com', 'localhost', '127.0.0.1']
 
 
 

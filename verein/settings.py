@@ -122,9 +122,9 @@ USE_TZ = True
 
 import os
 
-# Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 
 # Optional für media-Dateien, wenn du später Bilder hochlädst:
 MEDIA_URL = '/media/'

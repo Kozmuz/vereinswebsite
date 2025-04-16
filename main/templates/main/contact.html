@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Kontakt</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <nav class="nav-container">
+        <img src="{% static 'css/amslogo.png' %}" alt="Vereinslogo" class="logo">
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/about/" target="_blank">Über uns</a></li>
+            <a href="/contact/" class="btn">Anmeldeformular zu den Veranstaltungen</a>
+            <a href="/contact/" class="btn" target="_blank">Jetzt Kontakt aufnehmen</a>
+        </ul>
+    </nav>
+
+    <h1>Kontakt aufnehmen</h1>
+    <p>Du kannst uns über folgende E-Mail-Adressen erreichen:</p>
+    <ul>
+        <li><a href="mailto:info@verein.de">info@verein.de</a></li>
+        <li><a href="mailto:kontakt@verein.de">kontakt@verein.de</a></li>
+    </ul>
+</body>
+</html>

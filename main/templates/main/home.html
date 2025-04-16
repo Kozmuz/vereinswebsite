@@ -1,0 +1,42 @@
+<!-- main/templates/main/home.html -->
+<!DOCTYPE html>
+{% load static %}
+
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Willkommen auf der Vereinsseite</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+</head>
+
+<body>
+
+    <!-- main/templates/main/home.html -->
+
+    <nav>
+        <div class="nav-container">
+            <!-- Logo -->
+            <img src="{% static 'css/amslogo.png' %}" alt="Vereinslogo" class="logo">
+
+            <!-- Menü -->
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/about/" target="_blank">Über uns</a></li>
+                <a href="/contact/" class="btn">Anmeldeformular zu den Veranstaltungen</a>
+                <a href="/contact/" class="btn" target="_blank">Jetzt Kontakt aufnehmen</a>
+            </ul>
+        </div>
+    </nav>
+
+
+    <!-- Hauptinhalt -->
+    <h1>Willkommen beim Verein</h1>
+    <p>Hier kommt dein Inhalt...</p>
+
+</body>
+
+</html>

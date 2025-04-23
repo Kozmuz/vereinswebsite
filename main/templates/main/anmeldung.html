@@ -10,7 +10,35 @@
     <h1>Anmeldung zu den Veranstaltungen</h1>
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
+        
+        <!-- Vorname -->
+        <label for="id_vorname">Vorname:</label>
+        {{ form.vorname }}
+        
+        <!-- Nachname -->
+        <label for="id_nachname">Nachname:</label>
+        {{ form.nachname }}
+        
+        <!-- E-Mail -->
+        <label for="id_email">E-Mail:</label>
+        {{ form.email }}
+        
+        <!-- Bemerkung -->
+        <label for="id_bemerkung">Bemerkung:</label>
+        {{ form.bemerkung }}
+        
+        <!-- Termin -->
+        <label for="id_termin">Termin:</label>
+        {{ form.termin }}
+        
+        <!-- Fahrzeugtyp -->
+        <label for="id_fahrzeugtyp">Fahrzeugtyp:</label>
+        {{ form.fahrzeugtyp }}
+        
+        <!-- Bezahlmethode -->
+        <label for="id_bezahlmethode">Bezahlmethode:</label>
+        {{ form.bezahlmethode }}
+
         <button type="submit">Abschicken</button>
     </form>
 </body>

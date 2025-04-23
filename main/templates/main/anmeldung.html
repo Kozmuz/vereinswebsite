@@ -7,11 +7,11 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
-    <h1>Jetzt anmelden</h1>
+    <h1>Anmeldung zu den Veranstaltungen</h1>
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">Absenden</button>
+        <button type="submit">Abschicken</button>
     </form>
 </body>
 </html>

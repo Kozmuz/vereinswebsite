@@ -1,45 +1,55 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <title>Anmeldung</title>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
+
 <body>
     <h1>Anmeldung zu den Veranstaltungen</h1>
     <form method="post">
         {% csrf_token %}
         
+
         <!-- Vorname -->
         <label for="id_vorname">Vorname:</label>
         {{ form.vorname }}
-        
+        <p>
         <!-- Nachname -->
         <label for="id_nachname">Nachname:</label>
         {{ form.nachname }}
-        
+        <p>
         <!-- E-Mail -->
         <label for="id_email">E-Mail:</label>
         {{ form.email }}
-        
+        <p>
         <!-- Bemerkung -->
         <label for="id_bemerkung">Bemerkung:</label>
         {{ form.bemerkung }}
-        
+        <p>
         <!-- Termin -->
         <label for="id_termin">Termin:</label>
-        {{ form.termin }}
-        
+        <input type="date" name="termin" id="id_termin">
+
         <!-- Fahrzeugtyp -->
         <label for="id_fahrzeugtyp">Fahrzeugtyp:</label>
+        <select name="fahrzeugtyp" id="id_fahrzeugtyp">
+            <option value="Auto">Auto</option>
+            <option value="Motorrad">Motorrad</option>
+            <option value="Fahrrad">Fahrrad</option>
+        </select>
+
         {{ form.fahrzeugtyp }}
-        
+
         <!-- Bezahlmethode -->
         <label for="id_bezahlmethode">Bezahlmethode:</label>
         {{ form.bezahlmethode }}
-
+        <p>
         <button type="submit">Abschicken</button>
     </form>
 </body>
+
 </html>

@@ -83,10 +83,15 @@ WSGI_APPLICATION = 'verein.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'anmeldungen',            # Name der PostgreSQL-Datenbank
+        'USER': 'anmeldungen_user',              # Dein DB-Nutzer
+        'PASSWORD': 'Kj0R4rApFv8UcPQSp5sh0sPEeGxsxweh',      # Dein Passwort
+        'HOST': 'dpg-d04h6bi4d50c73a6g5r0-a.virginia-postgres.render.com',              # oder IP-Adresse (z.B. bei Render oder Heroku)
+        'PORT': '5432',                   # Standardport für PostgreSQL
     }
 }
+
 
 
 # Password validation

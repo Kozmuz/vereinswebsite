@@ -28,7 +28,7 @@ DEBUG = True
 
 import os
 ALLOWED_HOSTS = ['.onrender.com', 'localhost', '127.0.0.1']
-
+import psycopg2
 
 
 # Application definition
@@ -81,14 +81,16 @@ WSGI_APPLICATION = 'verein.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+from decouple import config
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'anmeldungen',            # Name der PostgreSQL-Datenbank
-        'USER': 'anmeldungen_user',              # Dein DB-Nutzer
-        'PASSWORD': 'Kj0R4rApFv8UcPQSp5sh0sPEeGxsxweh',      # Dein Passwort
-        'HOST': 'dpg-d04h6bi4d50c73a6g5r0-a.virginia-postgres.render.com',              # oder IP-Adresse (z.B. bei Render oder Heroku)
-        'PORT': '5432',                   # Standardport für PostgreSQL
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT', default='5432'),
     }
 }
 

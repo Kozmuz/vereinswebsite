@@ -15,11 +15,11 @@
         <ul class="nav-links">
             <li><a href="/">Home</a></li>
             <li><a href="/about/">Über uns</a></li>
-            <a href="/contact/" class="btn">Anmeldeformular zu den Veranstaltungen</a>
+            <a href="{% url 'anmeldung' %}" class="btn">Jetzt zur Veranstaltung anmelden</a>
             <a href="/contact/" class="btn">Jetzt Kontakt aufnehmen</a>
         </ul>
     </nav>
-
+    
     <h1>Anmeldung zu den Veranstaltungen</h1>
     <form method="post">
         {% csrf_token %}

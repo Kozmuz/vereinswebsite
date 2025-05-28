@@ -10,7 +10,7 @@
 
 <body>
 
-   <nav class="nav-container">
+    <nav class="nav-container">
         <img src="{% static 'css/amslogo.png' %}" alt="Logo" class="logo">
         <ul class="nav-links">
             <li><a href="/">Home</a></li>
@@ -19,48 +19,134 @@
             <a href="/contact/" class="btn">Jetzt Kontakt aufnehmen</a>
         </ul>
     </nav>
-    
+
     <h1>Anmeldung zu den Veranstaltungen</h1>
     <form method="post">
         {% csrf_token %}
-        
+
 
         <!-- Vorname -->
         <label for="id_vorname">Vorname:</label>
         {{ form.vorname }}
         <p>
-        <!-- Nachname -->
-        <label for="id_nachname">Nachname:</label>
-        {{ form.nachname }}
+            <!-- Nachname -->
+            <label for="id_nachname">Nachname:</label>
+            {{ form.nachname }}
         <p>
-        <!-- E-Mail -->
-        <label for="id_email">E-Mail:</label>
-        {{ form.email }}
+            <!-- E-Mail -->
+            <label for="id_email">E-Mail:</label>
+            {{ form.email }}
         <p>
-        <!-- Bemerkung -->
-        <label for="id_bemerkung">Bemerkung:</label>
-        {{ form.bemerkung }}
+            <!-- Bemerkung -->
+            <label for="id_bemerkung">Bemerkung:</label>
+            {{ form.bemerkung }}
         <p>
-        <!-- Termin -->
-        <label for="id_termin">Termin:</label>
-        <input type="date" name="termin" id="id_termin">
+            <!-- Termin -->
+            <label for="id_termin">Termin:</label>
+            <!--<input type="date" name="termin" id="id_termin">-->
+            {{ form.termin }}
 
-        <!-- Fahrzeugtyp -->
-        <label for="id_fahrzeugtyp">Fahrzeugtyp:</label>
-        <select name="fahrzeugtyp" id="id_fahrzeugtyp">
+            <!-- Fahrzeugtyp -->
+            <label for="id_fahrzeugtyp">Fahrzeugtyp:</label>
+            <!--<select name="fahrzeugtyp" id="id_fahrzeugtyp">
             <option value="Auto">Auto</option>
             <option value="Motorrad">Motorrad</option>
             <option value="Fahrrad">Fahrrad</option>
-        </select>
+        </select>-->
+            {{ form.fahrzeugtyp }}
 
-        {{ form.fahrzeugtyp }}
-
-        <!-- Bezahlmethode -->
-        <label for="id_bezahlmethode">Bezahlmethode:</label>
-        {{ form.bezahlmethode }}
+            <!-- Bezahlmethode   Auskommentiert, da wir PayPal verwenden 
+            <label for="id_bezahlmethode">Bezahlmethode:</label>
+        {{ form.bezahlmethode }}-->
+        <div id="paypal-button-container"></div>
         <p>
-        <button type="submit">Abschicken</button>
+            <button type="submit">Abschicken</button>
     </form>
+    <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency=EUR"></script>
+    <script>
+        // Funktion zum Holen des CSRF-Tokens (benötigt, falls du csrf_exempt entfernst)
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        paypal.Buttons({
+            createOrder: function (data, actions) {
+                // Rufe deine Django View auf, um die Order zu erstellen
+                return fetch('/paypal/create-order/', { // <-- Passe die URL an!
+                    method: 'post',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken') // Wenn du csrf_exempt entfernst, ist das nötig
+                    },
+                    body: JSON.stringify({
+                        // TODO: Sende den tatsächlichen Betrag und andere nötige Daten aus deinem Formular
+                        amount: '10.00' // Beispielwert - ersetze ihn!
+                    })
+                }).then(function (response) {
+                    if (!response.ok) { // Prüfe auf HTTP-Fehler
+                        return response.json().then(err => { throw new Error(err.error || 'Failed to create order'); });
+                    }
+                    return response.json();
+                }).then(function (orderData) {
+                    // Gib die Order ID von PayPal zurück, damit das SDK den Checkout starten kann
+                    return orderData.id;
+                }).catch(function (error) {
+                    console.error('Error creating PayPal order:', error);
+                    alert('Konnte PayPal-Bestellung nicht erstellen: ' + error.message);
+                    // Zeige eine Fehlermeldung an den Benutzer
+                });
+            },
+            onApprove: function (data, actions) {
+                // Rufe deine Django View auf, um die Order abzuschließen
+                return fetch('/paypal/capture-order/', { // <-- Passe die URL an!
+                    method: 'post',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken') // Wenn du csrf_exempt entfernst, ist das nötig
+                    },
+                    body: JSON.stringify({
+                        orderID: data.orderID // Sende die Order ID, die gerade genehmigt wurde
+                    })
+                }).then(function (response) {
+                    if (!response.ok) { // Prüfe auf HTTP-Fehler
+                        return response.json().then(err => { throw new Error(err.error || 'Failed to capture order'); });
+                    }
+                    return response.json();
+                }).then(function (orderData) {
+                    // Die Zahlung wurde erfolgreich abgeschlossen (aus Sicht von PayPal API)
+                    // TODO: Hier den Benutzer informieren oder weiterleiten
+                    alert('Zahlung erfolgreich abgeschlossen! Transaktions-ID: ' + orderData.id);
+                    // Beispiel: Weiterleitung zur Anmelde-Erfolgsseite
+                    // window.location.href = '/anmeldung-erfolgreich/';
+
+                }).catch(function (error) {
+                    console.error('Error capturing PayPal order:', error);
+                    alert('Ein Fehler ist beim Abschließen der Zahlung aufgetreten: ' + error.message);
+                    // Zeige eine Fehlermeldung an den Benutzer
+                });
+            },
+            onCancel: function (data) {
+                // Benutzer hat Zahlung abgebrochen
+                alert('Zahlung wurde abgebrochen.');
+            },
+            onError: function (err) {
+                // Fehler ist aufgetreten
+                console.error('PayPal Fehler:', err);
+                alert('Ein PayPal-Fehler ist aufgetreten.');
+            }
+        }).render('#paypal-button-container'); // Rendere die Buttons in das div mit der ID "paypal-button-container"
+    </script>
 </body>
 
 </html>

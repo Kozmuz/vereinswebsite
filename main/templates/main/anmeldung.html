@@ -24,7 +24,6 @@
     <form method="post">
         {% csrf_token %}
 
-
         <!-- Vorname -->
         <label for="id_vorname">Vorname:</label>
         {{ form.vorname }}
@@ -43,22 +42,21 @@
         <p>
             <!-- Termin -->
             <label for="id_termin">Termin:</label>
-            <!--<input type="date" name="termin" id="id_termin">-->
-            {{ form.termin }}
+            <input type="date" name="termin" id="id_termin">
 
             <!-- Fahrzeugtyp -->
             <label for="id_fahrzeugtyp">Fahrzeugtyp:</label>
-            <!--<select name="fahrzeugtyp" id="id_fahrzeugtyp">
-            <option value="Auto">Auto</option>
-            <option value="Motorrad">Motorrad</option>
-            <option value="Fahrrad">Fahrrad</option>
-        </select>-->
+            <select name="fahrzeugtyp" id="id_fahrzeugtyp">
+                <option value="Auto">Auto</option>
+                <option value="Motorrad">Motorrad</option>
+                <option value="Fahrrad">Fahrrad</option>
+            </select>
+
             {{ form.fahrzeugtyp }}
 
-            <!-- Bezahlmethode   Auskommentiert, da wir PayPal verwenden 
+            <!-- Bezahlmethode -->
             <label for="id_bezahlmethode">Bezahlmethode:</label>
-        {{ form.bezahlmethode }}-->
-        <div id="paypal-button-container"></div>
+            {{ form.bezahlmethode }}
         <p>
             <button type="submit">Abschicken</button>
     </form>

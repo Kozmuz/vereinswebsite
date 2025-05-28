@@ -153,7 +153,3 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
-print("DEBUG: DATABASE_URL aus os.getenv:", os.getenv('DATABASE_URL'))
-print("DEBUG: DATABASE_URL aus decouple.config:", config('DATABASE_URL', default='KEINE_DB_URL_GEFUNDEN'))

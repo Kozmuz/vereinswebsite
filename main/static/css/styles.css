@@ -13,7 +13,7 @@ body {
 
 /* Navigation */
 nav {
-    background-color: #007bff;
+    background-color: #a1c0e0;
     /* Hintergrundfarbe */
     padding: 10px 20px;
     border-bottom: 1px solid #ddd;
@@ -65,7 +65,7 @@ form {
     margin: 0 auto;
     /* Formular zentrieren */
     padding: 20px;
-    background-color: #f9f9f9;
+    background-color: #a1c0e0;
     /* Hintergrundfarbe für das Formular */
     border-radius: 8px;
     /* Abgerundete Ecken */

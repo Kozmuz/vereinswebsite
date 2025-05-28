@@ -2,6 +2,10 @@ from django.shortcuts import render, redirect
 from django.conf import settings
 from .forms import Anmeldeformular
 from .models import Anmeldung
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Anmeldung
+import json
 
 def home(request):
     return render(request, 'main/home.html')
@@ -32,6 +36,32 @@ def anmeldung_view(request):
         'PAYPAL_CLIENT_ID': settings.PAYPAL_CLIENT_ID
     }
     return render(request, 'main/anmeldung.html', context)
+
+def create_order(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            anmeldung_id = data.get("anmeldung_id")
+
+            # Hier kannst du z. B. den PayPal-Request simulieren
+            fake_order_id = "ORDER-" + str(anmeldung_id)
+
+            return JsonResponse({"id": fake_order_id})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+    return JsonResponse({"error": "Invalid method"}, status=405)
+
+def capture_order(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            order_id = data.get("orderID")
+
+            # Simuliere PayPal Capture – später hier echte API-Integration
+            return JsonResponse({"status": "COMPLETED", "id": order_id})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+    return JsonResponse({"error": "Invalid method"}, status=405)
 
 def anmeldung_erfolg_view(request):
     return render(request, 'main/anmeldung_erfolg.html')

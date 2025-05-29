@@ -33,7 +33,8 @@ def anmeldung_view(request):
 
     return render(request, 'main/anmeldung.html', {
         'form': form,
-        'anmeldung': anmeldung
+        'anmeldung': anmeldung,
+        'PAYPAL_CLIENT_ID': settings.PAYPAL_CLIENT_ID 
     })
 
 def create_order(request):

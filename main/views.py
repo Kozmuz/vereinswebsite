@@ -24,7 +24,8 @@ def anmeldung_view(request):
             # Danach Formular nochmal anzeigen, mit versteckter Anmeldung-ID für PayPal
             return render(request, 'main/anmeldung.html', {
                 'form': form,
-                'anmeldung': anmeldung  # WICHTIG: wird im Template benötigt
+                'anmeldung': anmeldung,  # WICHTIG: wird im Template benötigt
+                 'PAYPAL_CLIENT_ID': settings.PAYPAL_CLIENT_ID 
             })
     else:
         form = Anmeldeformular()

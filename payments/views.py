@@ -13,6 +13,11 @@ from main.models import Anmeldung # Beispiel-Import
 
 logger = logging.getLogger(__name__)
 
+from django.shortcuts import render
+
+def anmeldung_erfolg_view(request):
+    return render(request, 'anmeldung_erfolg.html')
+
 # Django view für den Stripe-Checkout (existierte bereits)
 def checkout(request):
     return HttpResponse("Hier kommt später das Stripe-Bezahlformular.")

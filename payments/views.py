@@ -57,9 +57,6 @@ def get_paypal_access_token():
         logger.error(f"Fehler beim Abrufen des PayPal Access Tokens: {error_response_text}", exc_info=True)
         raise Exception("Konnte PayPal Access Token nicht abrufen.")
 
-
-# Diese View wird vom Frontend aufgerufen, um eine PayPal Order zu erstellen
-@csrf_exempt # Temporär für Tests - FÜR PRODUKTION ENTFERNEN!
 def create_paypal_order(request):
     if request.method == 'POST':
         try:
@@ -138,9 +135,6 @@ def create_paypal_order(request):
             return JsonResponse({'error': str(e)}, status=500)
     return JsonResponse({'error': 'Ungültige Request-Methode'}, status=405)
 
-
-# Diese View wird vom Frontend aufgerufen, um eine PayPal Order abzuschließen (erfassen)
-@csrf_exempt # Temporär für Tests - FÜR PRODUKTION ENTFERNEN!
 def capture_paypal_order(request):
     if request.method == 'POST':
         try:
@@ -160,7 +154,6 @@ def capture_paypal_order(request):
             except Anmeldung.MultipleObjectsReturned:
                 logger.error(f"Mehrere Anmeldungen gefunden für PayPal Order ID: {order_id}. Dies sollte nicht passieren!")
                 return JsonResponse({'error': 'Interner Fehler: Mehrere Anmeldungen mit derselben PayPal Order ID.'}, status=500)
-
 
             access_token = get_paypal_access_token()
             

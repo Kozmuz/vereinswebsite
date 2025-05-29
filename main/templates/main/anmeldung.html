@@ -24,49 +24,51 @@
     <form method="post">
         {% csrf_token %}
 
-        <label for="id_vorname">Vorname:</label>
-        {{ form.vorname }}
         <p>
-            <label for="id_nachname">Nachname:</label>
+            <label for="id_vorname">Vorname:</label><br>
+            {{ form.vorname }}
+        </p>
+        <p>
+            <label for="id_nachname">Nachname:</label><br>
             {{ form.nachname }}
+        </p>
         <p>
-            <label for="id_email">E-Mail:</label>
+            <label for="id_email">E-Mail:</label><br>
             {{ form.email }}
+        </p>
         <p>
-            <label for="id_bemerkung">Bemerkung:</label>
+            <label for="id_bemerkung">Bemerkung:</label><br>
             {{ form.bemerkung }}
+        </p>
         <p>
-            <label for="id_termin">Termin:</label>
-            {{ form.termin }} {# KORREKT: Nur Django-Feld verwenden #}
-
-            <label for="id_fahrzeugtyp">Fahrzeugtyp:</label>
-            {{ form.fahrzeugtyp }} {# KORREKT: Nur Django-Feld verwenden #}
-
-            {# Bezahlmethode - Dieses Label und Feld werden durch die PayPal Buttons ersetzt #}
-            {# <label for="id_bezahlmethode">Bezahlmethode:</label> #}
-            {# {{ form.bezahlmethode }} #}
+            <label for="id_termin">Termin:</label><br>
+            {{ form.termin }}
+        </p>
         <p>
-            {# Optional: Ein Label für die PayPal Buttons #}
-            {% if anmeldung %}
+            <label for="id_fahrzeugtyp">Fahrzeugtyp:</label><br>
+            {{ form.fahrzeugtyp }}
+        </p>
+
+        {% if anmeldung %}
             <input type="hidden" id="id_anmeldung_id_hidden_field" value="{{ anmeldung.id }}">
-            {% endif %}
-            <p><strong>Mitgliedschaftsbeitrag: Bitte begleichen Sie den Beitrag für die kommenden 6 Monate in Höhe von 10 Euro über PayPal.</strong></p>
-            <label>Mit PayPal bezahlen:</label>
-            <div id="paypal-button-container"></div> 
-        <p>
-            {# Der Abschicken-Button wird normalerweise nur für NICHT-PayPal-Zahlungen verwendet oder muss per JS gesteuert werden #}
-            <button type="submit">Abschicken</button>
+        {% endif %}
+
+        <p><strong>Mitgliedschaftsbeitrag:</strong> Bitte begleichen Sie den Beitrag für die kommenden 6 Monate in Höhe von 10 Euro über PayPal.</p>
+
+        <label>Mit PayPal bezahlen:</label>
+        <div id="paypal-button-container"></div>
+
+        <p><button type="submit">Abschicken</button></p>
     </form>
-    {# KORREKT: Client ID als Django-Variable übergeben #}
-    <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency=EUR"></script>
+
+    <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency=EUR&intent=capture&components=buttons,funding"></script>
     <script>
-        // Funktion zum Holen des CSRF-Tokens (benötigt, falls du csrf_exempt entfernst)
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
                 const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
+                for (let cookie of cookies) {
+                    cookie = cookie.trim();
                     if (cookie.substring(0, name.length + 1) === (name + '=')) {
                         cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                         break;
@@ -76,78 +78,64 @@
             return cookieValue;
         }
 
-        
-        // Warte, bis die Seite vollständig geladen ist, bevor PayPal-Buttons initialisiert werden
-        window.onload = function() {
-            paypal.Buttons({
-                createOrder: function (data, actions) {
-                    // TODO: Hole die anmeldung_id und den tatsächlichen Betrag aus dem Formular
-                    // Beispiel: anmeldung_id muss von deinem Django-View an das Template übergeben werden
-                    // oder nach dem initialen Speichern der Anmeldung im Frontend verfügbar sein.
-                    const anmeldungId = document.querySelector('#id_anmeldung_id_hidden_field')?.value; // Beispiel für ein verstecktes Feld
+        document.addEventListener("DOMContentLoaded", function () {
+            const anmeldungId = document.querySelector('#id_anmeldung_id_hidden_field')?.value || '';
+            const fahrzeugtyp = document.querySelector('#id_fahrzeugtyp')?.value || '';
+            let amount = '10.00'; // Default-Wert
 
-                    // Beispiel: Betrag basierend auf Fahrzeugtyp (muss auf Backend validiert werden!)
-                    const fahrzeugtyp = document.querySelector('#id_fahrzeugtyp').value;
-                    let amount = '10.00'; // Standardwert, wird vom Backend überschrieben/validiert
-                    // if (fahrzeugtyp === 'Auto') amount = '20.00';
-                    // else if (fahrzeugtyp === 'Motorrad') amount = '15.00';
+            const renderButton = (fundingSource) => {
+                paypal.Buttons({
+                    style: {
+                        layout: 'vertical',
+                        shape: 'rect',
+                        color: 'blue',
+                        label: 'pay',
+                    },
+                    fundingSource: fundingSource,
+                    createOrder: function (data, actions) {
+                        return fetch('/paypal/create-order/', {
+                            method: 'post',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            body: JSON.stringify({
+                                amount: amount,
+                                anmeldung_id: anmeldungId
+                            })
+                        }).then(res => res.json()).then(orderData => orderData.id);
+                    },
+                    onApprove: function (data) {
+                        return fetch('/paypal/capture-order/', {
+                            method: 'post',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            body: JSON.stringify({
+                                orderID: data.orderID
+                            })
+                        }).then(res => res.json()).then(orderData => {
+                            alert('Zahlung erfolgreich! Transaktion: ' + orderData.id);
+                            // Optional: Formular absenden oder Weiterleitung
+                            // document.querySelector('form').submit();
+                        });
+                    },
+                    onCancel: function () {
+                        alert('Zahlung abgebrochen.');
+                    },
+                    onError: function (err) {
+                        console.error('PayPal Fehler:', err);
+                        alert('Fehler bei PayPal-Zahlung.');
+                    }
+                }).render('#paypal-button-container');
+            };
 
-                    return fetch('/paypal/create-order/', {
-                        method: 'post',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': getCookie('csrftoken')
-                        },
-                        body: JSON.stringify({
-                            amount: amount, // Sende den (vorläufigen) Betrag
-                            anmeldung_id: anmeldungId // Sende die Anmeldungs-ID
-                        })
-                    }).then(function (response) {
-                        if (!response.ok) {
-                            return response.json().then(err => { throw new Error(err.error || 'Failed to create order'); });
-                        }
-                        return response.json();
-                    }).then(function (orderData) {
-                        return orderData.id;
-                    }).catch(function (error) {
-                        console.error('Error creating PayPal order:', error);
-                        alert('Konnte PayPal-Bestellung nicht erstellen: ' + error.message);
-                    });
-                },
-                onApprove: function (data, actions) {
-                    return fetch('/paypal/capture-order/', {
-                        method: 'post',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': getCookie('csrftoken')
-                        },
-                        body: JSON.stringify({
-                            orderID: data.orderID
-                        })
-                    }).then(function (response) {
-                        if (!response.ok) {
-                            return response.json().then(err => { throw new Error(err.error || 'Failed to capture order'); });
-                        }
-                        return response.json();
-                    }).then(function (orderData) {
-                        alert('Zahlung erfolgreich abgeschlossen! Transaktions-ID: ' + orderData.id);
-                        // Beispiel: Weiterleitung zur Erfolgsseite
-                        // window.location.href = '/anmeldung-erfolgreich/';
-                    }).catch(function (error) {
-                        console.error('Error capturing PayPal order:', error);
-                        alert('Ein Fehler ist beim Abschließen der Zahlung aufgetreten: ' + error.message);
-                    });
-                },
-                onCancel: function (data) {
-                    alert('Zahlung wurde abgebrochen.');
-                },
-                onError: function (err) {
-                    console.error('PayPal Fehler:', err);
-                    alert('Ein PayPal-Fehler ist aufgetreten.');
-                }
-            }).render('#paypal-button-container');
-        }; // Ende von window.onload
+            renderButton(paypal.FUNDING.PAYPAL); // PayPal
+            if (paypal.FUNDING.CARD) renderButton(paypal.FUNDING.CARD); // Kreditkarte
+            if (paypal.FUNDING.SEPA) renderButton(paypal.FUNDING.SEPA); // Lastschrift
+        });
     </script>
-</body>
 
+</body>
 </html>

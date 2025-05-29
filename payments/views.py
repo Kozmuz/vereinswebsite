@@ -4,6 +4,7 @@ import logging
 import datetime # Für das Speichern des Zahlungsdatums
 from django.http import JsonResponse, HttpResponse
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
 
 # Importiere dein Anmeldungs-Modell. Passe 'main' an den tatsächlichen App-Namen an,
 # in dem dein Anmeldung-Modell definiert ist (z.B. 'website.models' oder 'anmeldung.models').

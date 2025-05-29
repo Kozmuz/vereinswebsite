@@ -47,6 +47,9 @@
             {# {{ form.bezahlmethode }} #}
         <p>
             {# Optional: Ein Label für die PayPal Buttons #}
+            {% if anmeldung %}
+            <input type="hidden" id="id_anmeldung_id_hidden_field" value="{{ anmeldung.id }}">
+            {% endif %}
             <label>Mit PayPal bezahlen:</label>
             <div id="paypal-button-container"></div> 
         <p>
@@ -72,6 +75,7 @@
             return cookieValue;
         }
 
+        
         // Warte, bis die Seite vollständig geladen ist, bevor PayPal-Buttons initialisiert werden
         window.onload = function() {
             paypal.Buttons({
@@ -95,7 +99,6 @@
                         },
                         body: JSON.stringify({
                             amount: amount, // Sende den (vorläufigen) Betrag
-                            fahrzeugtyp: fahrzeugtyp, // Sende den Fahrzeugtyp zur Backend-Validierung/Preisermittlung
                             anmeldung_id: anmeldungId // Sende die Anmeldungs-ID
                         })
                     }).then(function (response) {

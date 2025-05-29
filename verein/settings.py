@@ -153,3 +153,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+PAYPAL_MODE = os.getenv('PAYPAL_MODE', 'live')  # 'live' für Produktion
+PAYPAL_CLIENT_ID = os.getenv('PAYPAL_CLIENT_ID')
+PAYPAL_CLIENT_SECRET = os.getenv('PAYPAL_CLIENT_SECRET')
+
+if PAYPAL_MODE == 'live':
+    PAYPAL_API_BASE_URL = "https://api-m.paypal.com"
+else:
+    PAYPAL_API_BASE_URL = "https://api-m.sandbox.paypal.com"

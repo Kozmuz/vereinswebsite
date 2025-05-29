@@ -20,30 +20,29 @@ def anmeldung_view(request):
     if request.method == 'POST':
         form = Anmeldeformular(request.POST)
         if form.is_valid():
-            anmeldung_obj = form.save()
-
-            context = {
+            anmeldung = form.save()  # speichert die Anmeldung in der DB
+            # Danach Formular nochmal anzeigen, mit versteckter Anmeldung-ID für PayPal
+            return render(request, 'anmeldung.html', {
                 'form': form,
-                'anmeldung_id': anmeldung_obj.id,
-                'PAYPAL_CLIENT_ID': settings.PAYPAL_CLIENT_ID
-            }
-            return render(request, 'main/anmeldung.html', context)
+                'anmeldung': anmeldung  # WICHTIG: wird im Template benötigt
+            })
     else:
         form = Anmeldeformular()
+        anmeldung = None
 
-    context = {
+    return render(request, 'anmeldung.html', {
         'form': form,
-        'PAYPAL_CLIENT_ID': settings.PAYPAL_CLIENT_ID
-    }
-    return render(request, 'main/anmeldung.html', context)
+        'anmeldung': anmeldung
+    })
 
 def create_order(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
             anmeldung_id = data.get("anmeldung_id")
+            amount = data.get("amount")  # falls du später validieren willst
 
-            # Hier kannst du z. B. den PayPal-Request simulieren
+            # Simuliere eine echte Order-ID von PayPal
             fake_order_id = "ORDER-" + str(anmeldung_id)
 
             return JsonResponse({"id": fake_order_id})

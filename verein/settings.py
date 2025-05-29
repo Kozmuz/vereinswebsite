@@ -22,7 +22,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -34,7 +33,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['.onrender.com', 'localhost', '127.0.0.1']
 # import psycopg2 # Dieser Import ist hier nicht direkt notwendig, dj_database_url handhabt das.
-
 
 # Application definition
 
@@ -60,12 +58,12 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware', # Nur einmal! Diese Zeile sollte die einzige sein
 ]
 
-
 ROOT_URLCONF = 'verein.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / "templates"]
         'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -81,7 +79,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'verein.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
@@ -90,7 +87,6 @@ DATABASES = {
         default=config('DATABASE_URL'), conn_max_age=600, ssl_require=True
     )
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -116,13 +112,12 @@ PAYPAL_CLIENT_ID = os.getenv('PAYPAL_CLIENT_ID')
 PAYPAL_CLIENT_SECRET = os.getenv('PAYPAL_CLIENT_SECRET')
 
 # Neu: PayPal Modus (z.B. 'sandbox' oder 'live')
-PAYPAL_MODE = os.getenv('PAYPAL_MODE', 'sandbox') # Standardwert ist 'sandbox'
+PAYPAL_MODE = os.getenv('PAYPAL_MODE', 'live') # Standardwert ist 'sandbox'
 
 if PAYPAL_MODE == 'live':
     PAYPAL_API_BASE_URL = "https://api-m.paypal.com"
 else: # Default to sandbox
     PAYPAL_API_BASE_URL = "https://api-m.sandbox.paypal.com"
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
@@ -135,7 +130,6 @@ USE_I18N = True
 
 USE_TZ = True # Stelle sicher, dass die Datenbank auch UTC verwendet oder konvertiert
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
@@ -143,22 +137,11 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-
 # Wenn du Media-Dateien verwendest, dann auch das hier:
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-PAYPAL_MODE = os.getenv('PAYPAL_MODE', 'live')  # 'live' für Produktion
-PAYPAL_CLIENT_ID = os.getenv('PAYPAL_CLIENT_ID')
-PAYPAL_CLIENT_SECRET = os.getenv('PAYPAL_CLIENT_SECRET')
-
-if PAYPAL_MODE == 'live':
-    PAYPAL_API_BASE_URL = "https://api-m.paypal.com"
-else:
-    PAYPAL_API_BASE_URL = "https://api-m.sandbox.paypal.com"

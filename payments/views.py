@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 from django.shortcuts import render
 
 def anmeldung_erfolg_view(request):
-    return render(request, 'anmeldung_erfolg.html')
+    return render(request, 'main/anmeldung_erfolg.html')
 
 # --- PayPal Integration ---
 

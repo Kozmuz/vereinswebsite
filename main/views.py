@@ -22,7 +22,7 @@ def anmeldung_view(request):
         if form.is_valid():
             anmeldung = form.save()  # speichert die Anmeldung in der DB
             # Danach Formular nochmal anzeigen, mit versteckter Anmeldung-ID für PayPal
-            return render(request, 'anmeldung.html', {
+            return render(request, 'main/anmeldung.html', {
                 'form': form,
                 'anmeldung': anmeldung  # WICHTIG: wird im Template benötigt
             })

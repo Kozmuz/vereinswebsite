@@ -30,7 +30,7 @@ def anmeldung_view(request):
         form = Anmeldeformular()
         anmeldung = None
 
-    return render(request, 'anmeldung.html', {
+    return render(request, 'main/anmeldung.html', {
         'form': form,
         'anmeldung': anmeldung
     })

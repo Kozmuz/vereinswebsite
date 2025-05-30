@@ -41,17 +41,12 @@
 
             <label for="id_fahrzeugtyp">Fahrzeugtyp:</label>
             {{ form.fahrzeugtyp }} {# KORREKT: Nur Django-Feld verwenden #}
-
-            {# Bezahlmethode - Dieses Label und Feld werden durch die PayPal Buttons ersetzt #}
-            {# <label for="id_bezahlmethode">Bezahlmethode:</label> #}
-            {# {{ form.bezahlmethode }} #}
         <p>
-            {# Optional: Ein Label für die PayPal Buttons #}
             <label>Mit PayPal bezahlen:</label>
             <div id="paypal-button-container"></div> 
         <p>
-            {# Der Abschicken-Button wird normalerweise nur für NICHT-PayPal-Zahlungen verwendet oder muss per JS gesteuert werden #}
-            <button type="submit">Abschicken</button>
+            <button type="button" id="absenden-button">Jetzt anmelden</button>
+
     </form>
     {# KORREKT: Client ID als Django-Variable übergeben #}
     <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency=EUR"></script>
@@ -71,6 +66,47 @@
             }
             return cookieValue;
         }
+
+document.getElementById('absenden-button').addEventListener('click', function () {
+    const csrfToken = getCookie('csrftoken');
+
+    const data = {
+        vorname: document.querySelector('#id_vorname').value,
+        nachname: document.querySelector('#id_nachname').value,
+        email: document.querySelector('#id_email').value,
+        bemerkung: document.querySelector('#id_bemerkung').value,
+        termin: document.querySelector('#id_termin').value,
+        fahrzeugtyp: document.querySelector('#id_fahrzeugtyp').value
+    };
+
+    fetch('/anmeldung/ajax/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Fehler beim Speichern der Anmeldung.');
+        return response.json();
+    })
+    .then(result => {
+        // Speichere anmeldung_id in verstecktem Feld
+        let hiddenField = document.createElement('input');
+        hiddenField.type = 'hidden';
+        hiddenField.id = 'id_anmeldung_id_hidden_field';
+        hiddenField.value = result.anmeldung_id;
+        document.querySelector('form').appendChild(hiddenField);
+
+        alert('Anmeldung gespeichert. Jetzt bitte mit PayPal bezahlen.');
+        // Optional: PayPal-Button sichtbar machen, falls er vorher versteckt war
+    })
+    .catch(error => {
+        console.error('Fehler beim Speichern:', error);
+        alert('Anmeldung konnte nicht gespeichert werden.');
+    });
+});
 
         // Warte, bis die Seite vollständig geladen ist, bevor PayPal-Buttons initialisiert werden
         window.onload = function() {

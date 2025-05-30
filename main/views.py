@@ -105,3 +105,19 @@ def capture_order(request):
 
 def anmeldung_erfolg_view(request):
     return render(request, 'main/anmeldung_erfolg.html')
+
+def anmeldung_ajax_view(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Ungültige JSON-Daten'}, status=400)
+
+        form = Anmeldeformular(data)
+        if form.is_valid():
+            anmeldung = form.save()
+            return JsonResponse({'anmeldung_id': anmeldung.id})
+        else:
+            return JsonResponse({'error': form.errors}, status=400)
+
+    return JsonResponse({'error': 'Nur POST erlaubt'}, status=405)

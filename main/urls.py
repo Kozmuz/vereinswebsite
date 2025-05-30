@@ -5,8 +5,7 @@ urlpatterns = [
     path('', views.home),
     path('about/', views.about),
     path('contact/', views.contact_view),
+    path('anmeldung/ajax/', views.anmeldung_ajax_view, name='anmeldung_ajax'),
     path('anmeldung/', views.anmeldung_view, name='anmeldung'),
-    path('paypal/create-order/', views.create_order, name='create_order'),
-    path('paypal/capture-order/', views.capture_order, name='capture_order'),
     path('anmeldung-erfolgreich/', views.anmeldung_erfolg_view, name='anmeldung_erfolg'),
 ]

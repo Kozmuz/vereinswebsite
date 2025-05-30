@@ -2,9 +2,10 @@ import json
 import requests
 import logging
 import datetime # Für das Speichern des Zahlungsdatums
+
 from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt # Temporär für Tests - FÜR PRODUKTION ENTFERNEN!
 from django.conf import settings
-from django.views.decorators.csrf import csrf_exempt
 
 # Importiere dein Anmeldungs-Modell. Passe 'main' an den tatsächlichen App-Namen an,
 # in dem dein Anmeldung-Modell definiert ist (z.B. 'website.models' oder 'anmeldung.models').
@@ -15,7 +16,12 @@ logger = logging.getLogger(__name__)
 from django.shortcuts import render
 
 def anmeldung_erfolg_view(request):
-    return render(request, 'main/anmeldung_erfolg.html')
+    return render(request, 'anmeldung_erfolg.html')
+
+# Django view für den Stripe-Checkout (existierte bereits)
+def checkout(request):
+    return HttpResponse("Hier kommt später das Stripe-Bezahlformular.")
+
 
 # --- PayPal Integration ---
 
@@ -51,7 +57,6 @@ def get_paypal_access_token():
         logger.error(f"Fehler beim Abrufen des PayPal Access Tokens: {error_response_text}", exc_info=True)
         raise Exception("Konnte PayPal Access Token nicht abrufen.")
 
-@csrf_exempt
 def create_paypal_order(request):
     if request.method == 'POST':
         try:
@@ -130,7 +135,6 @@ def create_paypal_order(request):
             return JsonResponse({'error': str(e)}, status=500)
     return JsonResponse({'error': 'Ungültige Request-Methode'}, status=405)
 
-@csrf_exempt
 def capture_paypal_order(request):
     if request.method == 'POST':
         try:

@@ -10,18 +10,18 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
+import dj_database_url # for simplified DB connections - JK
+from decouple import config # Importiere config von decouple
+
+from dotenv import load_dotenv
+
+load_dotenv() # Lade Umgebungsvariablen aus .env
+
 from pathlib import Path
 
-# Basisverzeichnis ermitteln
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# .env-Datei laden (aus dem Projektstammverzeichnis)
-from dotenv import load_dotenv
-load_dotenv(dotenv_path=BASE_DIR / '.env')
-
-# DB und config
-import dj_database_url
-from decouple import config  # wird hier ggf. nicht mehr benötigt, wenn du nur os.getenv() verwendest
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -34,6 +34,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['.onrender.com', 'localhost', '127.0.0.1']
 # import psycopg2 # Dieser Import ist hier nicht direkt notwendig, dj_database_url handhabt das.
+
 
 # Application definition
 
@@ -59,12 +60,13 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware', # Nur einmal! Diese Zeile sollte die einzige sein
 ]
 
+
 ROOT_URLCONF = 'verein.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / "templates"],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -79,6 +81,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'verein.wsgi.application'
 
+
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
@@ -87,6 +90,7 @@ DATABASES = {
         default=config('DATABASE_URL'), conn_max_age=600, ssl_require=True
     )
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -113,13 +117,12 @@ PAYPAL_CLIENT_SECRET = os.getenv('PAYPAL_CLIENT_SECRET')
 
 # Neu: PayPal Modus (z.B. 'sandbox' oder 'live')
 PAYPAL_MODE = os.getenv('PAYPAL_MODE', 'sandbox') # Standardwert ist 'sandbox'
-print("PAYPAL_CLIENT_ID:", os.getenv('PAYPAL_CLIENT_ID'))
-print("PAYPAL_MODE:", os.getenv('PAYPAL_MODE'))
 
 if PAYPAL_MODE == 'live':
     PAYPAL_API_BASE_URL = "https://api-m.paypal.com"
 else: # Default to sandbox
     PAYPAL_API_BASE_URL = "https://api-m.sandbox.paypal.com"
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
@@ -132,6 +135,7 @@ USE_I18N = True
 
 USE_TZ = True # Stelle sicher, dass die Datenbank auch UTC verwendet oder konvertiert
 
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
@@ -139,9 +143,11 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
+
 # Wenn du Media-Dateien verwendest, dann auch das hier:
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

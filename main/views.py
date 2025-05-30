@@ -1,10 +1,10 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.conf import settings
 from .forms import Anmeldeformular
 from .models import Anmeldung
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import Anmeldung
+import requests
 import json
 
 def home(request):
@@ -21,7 +21,6 @@ def anmeldung_view(request):
         form = Anmeldeformular(request.POST)
         if form.is_valid():
             anmeldung_obj = form.save()
-
             context = {
                 'form': form,
                 'anmeldung_id': anmeldung_obj.id,
@@ -37,28 +36,69 @@ def anmeldung_view(request):
     }
     return render(request, 'main/anmeldung.html', context)
 
+def get_paypal_access_token():
+    response = requests.post(
+        f"{settings.PAYPAL_API_BASE_URL}/v1/oauth2/token",
+        auth=(settings.PAYPAL_CLIENT_ID, settings.PAYPAL_CLIENT_SECRET),
+        headers={"Accept": "application/json"},
+        data={"grant_type": "client_credentials"}
+    )
+    response.raise_for_status()
+    return response.json()["access_token"]
+
+@csrf_exempt
 def create_order(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
-            anmeldung_id = data.get("anmeldung_id")
+            amount = data.get("amount", "10.00")
 
-            # Hier kannst du z. B. den PayPal-Request simulieren
-            fake_order_id = "ORDER-" + str(anmeldung_id)
+            access_token = get_paypal_access_token()
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {access_token}"
+            }
 
-            return JsonResponse({"id": fake_order_id})
+            order_data = {
+                "intent": "CAPTURE",
+                "purchase_units": [{
+                    "amount": {
+                        "currency_code": "EUR",
+                        "value": amount
+                    }
+                }]
+            }
+
+            response = requests.post(
+                f"{settings.PAYPAL_API_BASE_URL}/v2/checkout/orders",
+                headers=headers,
+                json=order_data
+            )
+            response.raise_for_status()
+            return JsonResponse(response.json())
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
     return JsonResponse({"error": "Invalid method"}, status=405)
 
+@csrf_exempt
 def capture_order(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
             order_id = data.get("orderID")
 
-            # Simuliere PayPal Capture – später hier echte API-Integration
-            return JsonResponse({"status": "COMPLETED", "id": order_id})
+            access_token = get_paypal_access_token()
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {access_token}"
+            }
+
+            response = requests.post(
+                f"{settings.PAYPAL_API_BASE_URL}/v2/checkout/orders/{order_id}/capture",
+                headers=headers
+            )
+            response.raise_for_status()
+            return JsonResponse(response.json())
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
     return JsonResponse({"error": "Invalid method"}, status=405)

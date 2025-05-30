@@ -22,18 +22,6 @@ def anmeldung_erfolg_view(request):
 def checkout(request):
     return HttpResponse("Hier kommt später das Stripe-Bezahlformular.")
 
-
-# --- PayPal Integration ---
-
-# PayPal API Basis-URL wird aus settings.py geladen (gesteuert durch PAYPAL_MODE)
-# settings.PAYPAL_API_BASE_URL wird in settings.py definiert, z.B. als:
-# PAYPAL_MODE = os.getenv('PAYPAL_MODE', 'sandbox')
-# if PAYPAL_MODE == 'live':
-#     PAYPAL_API_BASE_URL = "https://api-m.paypal.com"
-# else:
-#     PAYPAL_API_BASE_URL = "https://api-m.sandbox.paypal.com"
-
-
 # Hilfsfunktion, um einen PayPal Access Token zu erhalten
 def get_paypal_access_token():
     auth_url = f"{settings.PAYPAL_API_BASE_URL}/v1/oauth2/token"

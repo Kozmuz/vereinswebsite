@@ -1,17 +1,72 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="de">
-
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Anmeldung erfolgreich</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-
-<body>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+  </head>
+  <body>
     <h1>Danke für deine Anmeldung!</h1>
-    <p>Wir haben deine Daten erhalten und melden uns bald bei dir.</p>
-    <a href="/">Zurück zur Startseite</a>
-</body>
+    <p>Wir haben Ihre Daten erhalten. Zahlen Sie bitte den Mitgliedsbeitrag in Höhe von 10 Euro pro Semester.: </p>
 
+    <div id="paypal-button-container"></div>
+
+    <a href="/">Zurück zur Startseite</a>
+
+    <!-- PayPal Script -->
+    <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency=EUR"></script>
+    <script>
+      function getCookie(name) {
+        let cookieValue = null
+        if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';')
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim()
+            if (cookie.substring(0, name.length + 1) === name + '=') {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1))
+              break
+            }
+          }
+        }
+        return cookieValue
+      }
+      
+      const anmeldungId = new URLSearchParams(window.location.search).get('anmeldung_id')
+      paypal
+        .Buttons({
+          createOrder: function (data, actions) {
+            return fetch('/paypal/create-order/', {
+              method: 'post',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+              },
+              body: JSON.stringify({
+                anmeldung_id: anmeldungId
+              })
+            })
+              .then((res) => res.json())
+              .then((data) => data.id)
+          },
+          onApprove: function (data, actions) {
+            return fetch('/paypal/capture-order/', {
+              method: 'post',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+              },
+              body: JSON.stringify({
+                orderID: data.orderID
+              })
+            })
+              .then((res) => res.json())
+              .then((orderData) => {
+                alert('Zahlung erfolgreich! Transaktions-ID: ' + orderData.id)
+              })
+          }
+        })
+        .render('#paypal-button-container')
+    </script>
+  </body>
 </html>

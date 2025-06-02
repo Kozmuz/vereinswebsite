@@ -6,25 +6,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0001_initial'),
+        ("main", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='anmeldung',
-            name='bezahlmethode',
+            model_name="anmeldung",
+            name="bezahlmethode",
             field=models.CharField(blank=True, max_length=100, null=True),
         ),
         migrations.AddField(
-            model_name='anmeldung',
-            name='fahrzeugtyp',
-            field=models.CharField(default='Empty', max_length=100),
+            model_name="anmeldung",
+            name="fahrzeugtyp",
+            field=models.CharField(default="Empty", max_length=100),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='anmeldung',
-            name='termin',
-            field=models.DateField(default='2025-01-01'),
+            model_name="anmeldung",
+            name="termin",
+            field=models.DateField(default="2025-01-01"),
             preserve_default=False,
         ),
     ]

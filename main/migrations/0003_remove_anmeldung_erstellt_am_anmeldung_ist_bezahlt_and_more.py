@@ -6,43 +6,50 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0002_anmeldung_bezahlmethode_anmeldung_fahrzeugtyp_and_more'),
+        ("main", "0002_anmeldung_bezahlmethode_anmeldung_fahrzeugtyp_and_more"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='anmeldung',
-            name='erstellt_am',
+            model_name="anmeldung",
+            name="erstellt_am",
         ),
         migrations.AddField(
-            model_name='anmeldung',
-            name='ist_bezahlt',
+            model_name="anmeldung",
+            name="ist_bezahlt",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='anmeldung',
-            name='paypal_order_id',
+            model_name="anmeldung",
+            name="paypal_order_id",
             field=models.CharField(blank=True, max_length=255, null=True, unique=True),
         ),
         migrations.AddField(
-            model_name='anmeldung',
-            name='zahlungsdatum',
+            model_name="anmeldung",
+            name="zahlungsdatum",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='anmeldung',
-            name='bemerkung',
+            model_name="anmeldung",
+            name="bemerkung",
             field=models.TextField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='anmeldung',
-            name='bezahlmethode',
+            model_name="anmeldung",
+            name="bezahlmethode",
             field=models.CharField(default=1, max_length=50),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='anmeldung',
-            name='fahrzeugtyp',
-            field=models.CharField(choices=[('Auto', 'Auto'), ('Motorrad', 'Motorrad'), ('Fahrrad', 'Fahrrad')], max_length=50),
+            model_name="anmeldung",
+            name="fahrzeugtyp",
+            field=models.CharField(
+                choices=[
+                    ("Auto", "Auto"),
+                    ("Motorrad", "Motorrad"),
+                    ("Fahrrad", "Fahrrad"),
+                ],
+                max_length=50,
+            ),
         ),
     ]

@@ -1,185 +1,118 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="de">
-
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Anmeldung</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+  </head>
 
-<body>
-
+  <body>
     <nav class="nav-container">
-        <img src="{% static 'css/amslogo.png' %}" alt="Logo" class="logo">
-        <ul class="nav-links">
-            <li><a href="/">Home</a></li>
-            <li><a href="/about/">Über uns</a></li>
-            <a href="{% url 'anmeldung' %}" class="btn">Jetzt zur Veranstaltung anmelden</a>
-            <a href="/contact/" class="btn">Jetzt Kontakt aufnehmen</a>
-        </ul>
+      <img src="{% static 'css/amslogo.png' %}" alt="Logo" class="logo" />
+      <ul class="nav-links">
+        <li>
+          <a href="/">Home</a>
+        </li>
+        <li>
+          <a href="/about/">Über uns</a>
+        </li>
+        <a href="{% url 'anmeldung' %}" class="btn">Jetzt zur Veranstaltung anmelden</a>
+        <a href="/contact/" class="btn">Jetzt Kontakt aufnehmen</a>
+      </ul>
     </nav>
 
     <h1>Anmeldung zu den Veranstaltungen</h1>
     <form method="post">
-        {% csrf_token %}
+      {% csrf_token %}
 
-        <label for="id_vorname">Vorname:</label>
-        {{ form.vorname }}
-        <p>
-            <label for="id_nachname">Nachname:</label>
-            {{ form.nachname }}
-        <p>
-            <label for="id_email">E-Mail:</label>
-            {{ form.email }}
-        <p>
-            <label for="id_bemerkung">Bemerkung:</label>
-            {{ form.bemerkung }}
-        <p>
-            <label for="id_termin">Termin:</label>
-            {{ form.termin }} {# KORREKT: Nur Django-Feld verwenden #}
+      <label for="id_vorname">Vorname:</label>
+      {{ form.vorname }}
+      <p>
+        <label for="id_nachname">Nachname:</label>
+        {{ form.nachname }}
+      </p>
+      <p>
+        <label for="id_email">E-Mail:</label>
+        {{ form.email }}
+      </p>
+      <p>
+        <label for="id_bemerkung">Bemerkung:</label>
+        {{ form.bemerkung }}
+      </p>
+      <p>
+        <label for="id_termin">Termin:</label>
+        {{ form.termin }} {# KORREKT: Nur Django-Feld verwenden #}
 
-            <label for="id_fahrzeugtyp">Fahrzeugtyp:</label>
-            {{ form.fahrzeugtyp }} {# KORREKT: Nur Django-Feld verwenden #}
-        <p>
-            <label>Mit PayPal bezahlen:</label>
-            <div id="paypal-button-container"></div> 
-        <p>
-            <button type="button" id="absenden-button">Jetzt anmelden</button>
-
+        <label for="id_fahrzeugtyp">Fahrzeugtyp:</label>
+        {{ form.fahrzeugtyp }} {# KORREKT: Nur Django-Feld verwenden #}
+      </p>
+      <p>
+        <button type="button" id="absenden-button">Jetzt anmelden</button>
+      </p>
     </form>
-    {# KORREKT: Client ID als Django-Variable übergeben #}
-    <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency=EUR"></script>
     <script>
-        // Funktion zum Holen des CSRF-Tokens (benötigt, falls du csrf_exempt entfernst)
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
+      // Funktion zum Holen des CSRF-Tokens (benötigt, falls du csrf_exempt entfernst)
+      function getCookie(name) {
+        let cookieValue = null
+        if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';')
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim()
+            if (cookie.substring(0, name.length + 1) === name + '=') {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1))
+              break
             }
-            return cookieValue;
+          }
         }
-
-document.getElementById('absenden-button').addEventListener('click', function () {
-    const csrfToken = getCookie('csrftoken');
-
-    const data = {
-        vorname: document.querySelector('#id_vorname').value,
-        nachname: document.querySelector('#id_nachname').value,
-        email: document.querySelector('#id_email').value,
-        bemerkung: document.querySelector('#id_bemerkung').value,
-        termin: document.querySelector('#id_termin').value,
-        fahrzeugtyp: document.querySelector('#id_fahrzeugtyp').value
-    };
-
-    fetch('/anmeldung/ajax/', {
-        method: 'POST',
-        headers: {
+        return cookieValue
+      }
+      
+      document.getElementById('absenden-button').addEventListener('click', function () {
+        const csrfToken = getCookie('csrftoken')
+      
+        const data = {
+          vorname: document.querySelector('#id_vorname').value,
+          nachname: document.querySelector('#id_nachname').value,
+          email: document.querySelector('#id_email').value,
+          bemerkung: document.querySelector('#id_bemerkung').value,
+          termin: document.querySelector('#id_termin').value,
+          fahrzeugtyp: document.querySelector('#id_fahrzeugtyp').value
+        }
+      
+        fetch('/anmeldung/ajax/', {
+          method: 'POST',
+          headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': csrfToken
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => {
-        if (!response.ok) throw new Error('Fehler beim Speichern der Anmeldung.');
-        return response.json();
-    })
-    .then(result => {
-        // Speichere anmeldung_id in verstecktem Feld
-        let hiddenField = document.createElement('input');
-        hiddenField.type = 'hidden';
-        hiddenField.id = 'id_anmeldung_id_hidden_field';
-        hiddenField.value = result.anmeldung_id;
-        document.querySelector('form').appendChild(hiddenField);
-
-        alert('Anmeldung gespeichert. Jetzt bitte mit PayPal bezahlen.');
-        // Optional: PayPal-Button sichtbar machen, falls er vorher versteckt war
-    })
-    .catch(error => {
-        console.error('Fehler beim Speichern:', error);
-        alert('Anmeldung konnte nicht gespeichert werden.');
-    });
-});
-
-        // Warte, bis die Seite vollständig geladen ist, bevor PayPal-Buttons initialisiert werden
-        window.onload = function() {
-            paypal.Buttons({
-                createOrder: function (data, actions) {
-                    // TODO: Hole die anmeldung_id und den tatsächlichen Betrag aus dem Formular
-                    // Beispiel: anmeldung_id muss von deinem Django-View an das Template übergeben werden
-                    // oder nach dem initialen Speichern der Anmeldung im Frontend verfügbar sein.
-                    const anmeldungId = document.querySelector('#id_anmeldung_id_hidden_field')?.value; // Beispiel für ein verstecktes Feld
-
-                    // Beispiel: Betrag basierend auf Fahrzeugtyp (muss auf Backend validiert werden!)
-                    const fahrzeugtyp = document.querySelector('#id_fahrzeugtyp').value;
-                    let amount = '10.00'; // Standardwert, wird vom Backend überschrieben/validiert
-                    // if (fahrzeugtyp === 'Auto') amount = '20.00';
-                    // else if (fahrzeugtyp === 'Motorrad') amount = '15.00';
-
-                    return fetch('/paypal/create-order/', {
-                        method: 'post',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': getCookie('csrftoken')
-                        },
-                        body: JSON.stringify({
-                            amount: amount, // Sende den (vorläufigen) Betrag
-                            fahrzeugtyp: fahrzeugtyp, // Sende den Fahrzeugtyp zur Backend-Validierung/Preisermittlung
-                            anmeldung_id: anmeldungId // Sende die Anmeldungs-ID
-                        })
-                    }).then(function (response) {
-                        if (!response.ok) {
-                            return response.json().then(err => { throw new Error(err.error || 'Failed to create order'); });
-                        }
-                        return response.json();
-                    }).then(function (orderData) {
-                        return orderData.id;
-                    }).catch(function (error) {
-                        console.error('Error creating PayPal order:', error);
-                        alert('Konnte PayPal-Bestellung nicht erstellen: ' + error.message);
-                    });
-                },
-                onApprove: function (data, actions) {
-                    return fetch('/paypal/capture-order/', {
-                        method: 'post',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': getCookie('csrftoken')
-                        },
-                        body: JSON.stringify({
-                            orderID: data.orderID
-                        })
-                    }).then(function (response) {
-                        if (!response.ok) {
-                            return response.json().then(err => { throw new Error(err.error || 'Failed to capture order'); });
-                        }
-                        return response.json();
-                    }).then(function (orderData) {
-                        alert('Zahlung erfolgreich abgeschlossen! Transaktions-ID: ' + orderData.id);
-                        // Beispiel: Weiterleitung zur Erfolgsseite
-                        // window.location.href = '/anmeldung-erfolgreich/';
-                    }).catch(function (error) {
-                        console.error('Error capturing PayPal order:', error);
-                        alert('Ein Fehler ist beim Abschließen der Zahlung aufgetreten: ' + error.message);
-                    });
-                },
-                onCancel: function (data) {
-                    alert('Zahlung wurde abgebrochen.');
-                },
-                onError: function (err) {
-                    console.error('PayPal Fehler:', err);
-                    alert('Ein PayPal-Fehler ist aufgetreten.');
-                }
-            }).render('#paypal-button-container');
-        }; // Ende von window.onload
+          },
+          body: JSON.stringify(data)
+        })
+          .then((response) => response.json())
+          .then((result) => {
+            if (result.anmeldung_id) {
+              // Optionale Anzeige oder Logging
+              console.log('Anmeldung erfolgreich:', result.anmeldung_id)
+      
+              // Optional: verstecktes Feld anlegen (falls du es brauchst)
+              let hiddenField = document.createElement('input')
+              hiddenField.type = 'hidden'
+              hiddenField.id = 'id_anmeldung_id_hidden_field'
+              hiddenField.value = result.anmeldung_id
+              document.querySelector('form').appendChild(hiddenField)
+      
+              // Jetzt sauber redirecten
+              window.location.href = `/anmeldung-erfolgreich/?anmeldung_id=${result.anmeldung_id}`
+            } else {
+              alert('Fehler bei der Anmeldung.')
+              console.error(result)
+            }
+          })
+          .catch((error) => {
+            console.error('Fehler beim Speichern:', error)
+            alert('Anmeldung konnte nicht gespeichert werden.')
+          })
+      })
     </script>
-</body>
-
+  </body>
 </html>

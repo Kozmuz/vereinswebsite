@@ -129,3 +129,24 @@ def anmeldung_ajax_view(request):
             return JsonResponse({"error": form.errors}, status=400)
 
     return JsonResponse({"error": "Nur POST erlaubt"}, status=405)
+
+
+from supabase import create_client, Client
+
+
+def zahlung_erfolgreich(request):
+    anmeldung_id = request.GET.get("anmeldung_id")
+
+    # Supabase initialisieren
+    url = os.getenv("SUPABASE_URL")
+    key = os.getenv("SUPABASE_KEY")
+    supabase: Client = create_client(url, key)
+
+    # Optional prüfen, ob Anmeldung existiert (oder gleich aktualisieren)
+    supabase.table("anmeldungen").update(
+        {"bezahlmethode": "paypal", "bezahlt": True}  # Falls du so ein Feld hast
+    ).eq("id", anmeldung_id).execute()
+
+    return render(
+        request, "main/zahlung_erfolgreich.html", {"anmeldung_id": anmeldung_id}
+    )

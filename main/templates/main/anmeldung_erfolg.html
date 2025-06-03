@@ -8,9 +8,12 @@
   </head>
   <body>
     <h1>Danke für deine Anmeldung!</h1>
-    <p>Wir haben Ihre Daten erhalten. Zahlen Sie bitte den Mitgliedsbeitrag in Höhe von 10 Euro pro Semester.: </p>
+    <p>Wir haben Ihre Daten erhalten. Zahlen Sie bitte den Mitgliedsbeitrag in Höhe von 10 Euro pro Semester.:</p>
 
     <div id="paypal-button-container"></div>
+
+    <h1 id="zahlung-erfolgreich" style="display: none;">Vielen Dank für Ihre Zahlung!</h1>
+    <p id="zahlung-text" style="display: none;">Ihre Anmeldung Nr. {{ anmeldung_id }} wurde erfolgreich bezahlt.</p>
 
     <a href="/">Zurück zur Startseite</a>
 
@@ -63,6 +66,13 @@
               .then((res) => res.json())
               .then((orderData) => {
                 alert('Zahlung erfolgreich! Transaktions-ID: ' + orderData.id)
+      
+                // ✅ Zeige Erfolgsmeldung
+                document.getElementById('zahlung-erfolgreich').style.display = 'block'
+                document.getElementById('zahlung-text').style.display = 'block'
+      
+                // ⛔️ Verstecke PayPal-Button
+                document.getElementById('paypal-button-container').style.display = 'none'
               })
           }
         })

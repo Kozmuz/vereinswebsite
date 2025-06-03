@@ -13,11 +13,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 import dj_database_url  # for simplified DB connections - JK
 from decouple import config  # Importiere config von decouple
-
 from dotenv import load_dotenv
-
 from supabase import create_client
-import os
 from dotenv import load_dotenv
 
 load_dotenv()

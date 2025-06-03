@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import requests
 import json
+import os
 
 def home(request):
     return render(request, "main/home.html")

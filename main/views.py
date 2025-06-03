@@ -7,18 +7,14 @@ from django.views.decorators.csrf import csrf_exempt
 import requests
 import json
 
-
 def home(request):
     return render(request, "main/home.html")
-
 
 def about(request):
     return render(request, "main/about.html")
 
-
 def contact_view(request):
     return render(request, "main/contact.html")
-
 
 def anmeldung_view(request):
     if request.method == "POST":
@@ -37,7 +33,6 @@ def anmeldung_view(request):
     context = {"form": form, "PAYPAL_CLIENT_ID": settings.PAYPAL_CLIENT_ID}
     return render(request, "main/anmeldung.html", context)
 
-
 def get_paypal_access_token():
     response = requests.post(
         f"{settings.PAYPAL_API_BASE_URL}/v1/oauth2/token",
@@ -47,7 +42,6 @@ def get_paypal_access_token():
     )
     response.raise_for_status()
     return response.json()["access_token"]
-
 
 @csrf_exempt
 def create_order(request):
@@ -80,7 +74,6 @@ def create_order(request):
             return JsonResponse({"error": str(e)}, status=400)
     return JsonResponse({"error": "Invalid method"}, status=405)
 
-
 @csrf_exempt
 def capture_order(request):
     if request.method == "POST":
@@ -104,7 +97,6 @@ def capture_order(request):
             return JsonResponse({"error": str(e)}, status=400)
     return JsonResponse({"error": "Invalid method"}, status=405)
 
-
 def anmeldung_erfolg_view(request):
     anmeldung_id = request.GET.get("anmeldung_id")
     return render(
@@ -112,7 +104,6 @@ def anmeldung_erfolg_view(request):
         "main/anmeldung_erfolg.html",
         {"PAYPAL_CLIENT_ID": settings.PAYPAL_CLIENT_ID, "anmeldung_id": anmeldung_id},
     )
-
 
 def anmeldung_ajax_view(request):
     if request.method == "POST":
@@ -132,7 +123,6 @@ def anmeldung_ajax_view(request):
 
 
 from supabase import create_client, Client
-
 
 def zahlung_erfolgreich(request):
     anmeldung_id = request.GET.get("anmeldung_id")

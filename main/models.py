@@ -7,10 +7,7 @@ class Anmeldung(models.Model):
     email = models.EmailField()
     bemerkung = models.TextField(blank=True, null=True)
     termin = models.DateField()
-    fahrzeugtyp = models.CharField(
-        max_length=50,
-        choices=[("Auto", "Auto"), ("Motorrad", "Motorrad"), ("Fahrrad", "Fahrrad")],
-    )
+    fahrzeugtyp = models.CharField(max_length=250, blank=True, null=True)
     bezahlmethode = models.CharField(max_length=50)
 
     # PayPal-Felder

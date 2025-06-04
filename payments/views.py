@@ -76,7 +76,7 @@ def create_paypal_order(request):
                 )
                 return JsonResponse({"error": "Anmeldung nicht gefunden"}, status=404)
 
-            calculated_amount = "10.00"
+            calculated_amount = "0.01"
             logger.info(
                 f"Erstelle PayPal Order für Anmeldung {anmeldung_id} mit Betrag: {calculated_amount} EUR."
             )

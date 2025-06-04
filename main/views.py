@@ -59,7 +59,7 @@ def create_order(request):
         try:
             data = json.loads(request.body)
             anmeldung_id = data.get("anmeldung_id")  # fehlt in deinem Beispiel
-            amount = data.get("amount", "10.00")
+            amount = data.get("amount", "0.01")
 
             access_token = get_paypal_access_token()
             headers = {

@@ -10,7 +10,7 @@
 
 <body>
   <h1>Danke für deine Anmeldung!</h1>
-  <p>Wir haben Ihre Daten erhalten. Zahlen Sie bitte den Mitgliedsbeitrag in Höhe von 10 Euro pro Semester.:</p>
+  <p>Wir haben Ihre Daten erhalten. Zahlen Sie bitte die Teilnahmegebühr in Höhe von 1 Cent: </p>
   <div id="paypal-button-container"></div>
   <h1 id="zahlung-erfolgreich" style="display: none; color: green;">Vielen Dank für Ihre Zahlung!</h1>
   <p id="zahlung-text" style="display: none; font-weight: bold;">
@@ -49,7 +49,7 @@
             },
             body: JSON.stringify({
               anmeldung_id: anmeldungId,
-              amount: '10.00'
+              amount: '0.01'
             })
           })
             .then((res) => res.json())

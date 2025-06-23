@@ -142,7 +142,6 @@ USE_I18N = True
 
 USE_TZ = True  # Stelle sicher, dass die Datenbank auch UTC verwendet oder konvertiert
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
@@ -150,13 +149,19 @@ STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-
 # Wenn du Media-Dateien verwendest, dann auch das hier:
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "maganiac13@gmail.com"
+EMAIL_HOST_PASSWORD = "iksh glzi tnwo qjco"  # Achtung: Kein normales Passwort!
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

@@ -51,68 +51,66 @@
         <button type="button" id="absenden-button">Jetzt anmelden</button>
       </p>
     </form>
-    <script>
-      // Funktion zum Holen des CSRF-Tokens (benötigt, falls du csrf_exempt entfernst)
-      function getCookie(name) {
-        let cookieValue = null
-        if (document.cookie && document.cookie !== '') {
-          const cookies = document.cookie.split(';')
-          for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim()
-            if (cookie.substring(0, name.length + 1) === name + '=') {
-              cookieValue = decodeURIComponent(cookie.substring(name.length + 1))
-              break
-            }
-          }
+
+<input type="hidden" name="bezahlmethode" id="id_bezahlmethode" value="paypal" />
+
+   <script>
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
         }
-        return cookieValue
       }
-      
-      document.getElementById('absenden-button').addEventListener('click', function () {
-        const csrfToken = getCookie('csrftoken')
-      
-        const data = {
-          vorname: document.querySelector('#id_vorname').value,
-          nachname: document.querySelector('#id_nachname').value,
-          email: document.querySelector('#id_email').value,
-          bemerkung: document.querySelector('#id_bemerkung').value,
-          termin: document.querySelector('#id_termin').value,
-          fahrzeugtyp: document.querySelector('#id_fahrzeugtyp').value
+    }
+    return cookieValue;
+  }
+
+  document.getElementById("absenden-button").addEventListener("click", function () {
+    const csrfToken = getCookie("csrftoken");
+
+    const data = {
+      vorname: document.querySelector("#id_vorname").value,
+      nachname: document.querySelector("#id_nachname").value,
+      email: document.querySelector("#id_email").value,
+      bemerkung: document.querySelector("#id_bemerkung").value,
+      termin: document.querySelector("#id_termin").value,
+      fahrzeugtyp: document.querySelector("#id_fahrzeugtyp").value,
+      bezahlmethode: "paypal"
+    };
+
+    fetch("/anmeldung/ajax/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrfToken
+      },
+      body: JSON.stringify(data)
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        if (result.anmeldung_id) {
+          // ✅ Zuerst: Bezahlung bestätigen
+          fetch("/zahlung-bestaetigen/?anmeldung_id=" + result.anmeldung_id)
+            .then((response) => response.text())
+            .then((text) => {
+              // ✅ Dann zur Erfolgsseite weiterleiten
+              window.location.href = `/anmeldung-erfolgreich/?anmeldung_id=${result.anmeldung_id}`;
+            });
+        } else {
+          alert("Fehler bei der Anmeldung.");
+          console.error(result);
         }
-      
-        fetch('/anmeldung/ajax/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken
-          },
-          body: JSON.stringify(data)
-        })
-          .then((response) => response.json())
-          .then((result) => {
-            if (result.anmeldung_id) {
-              // Optionale Anzeige oder Logging
-              console.log('Anmeldung erfolgreich:', result.anmeldung_id)
-      
-              // Optional: verstecktes Feld anlegen (falls du es brauchst)
-              let hiddenField = document.createElement('input')
-              hiddenField.type = 'hidden'
-              hiddenField.id = 'id_anmeldung_id_hidden_field'
-              hiddenField.value = result.anmeldung_id
-              document.querySelector('form').appendChild(hiddenField)
-      
-              // Jetzt sauber redirecten
-              window.location.href = `/anmeldung-erfolgreich/?anmeldung_id=${result.anmeldung_id}`
-            } else {
-              alert('Fehler bei der Anmeldung.')
-              console.error(result)
-            }
-          })
-          .catch((error) => {
-            console.error('Fehler beim Speichern:', error)
-            alert('Anmeldung konnte nicht gespeichert werden.')
-          })
       })
-    </script>
+      .catch((error) => {
+        console.error("Fehler beim Speichern:", error);
+        alert("Anmeldung konnte nicht gespeichert werden.");
+      });
+  });
+</script>
   </body>
 </html>

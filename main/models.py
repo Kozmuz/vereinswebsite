@@ -1,4 +1,6 @@
 from django.db import models
+import uuid
+from django.db import models
 
 
 class Anmeldung(models.Model):
@@ -19,3 +21,13 @@ class Anmeldung(models.Model):
 
     def __str__(self):
         return f"{self.vorname} {self.nachname} - {self.termin}"
+
+
+class Participant(models.Model):
+    anmeldung = models.ForeignKey(
+        "Anmeldung", on_delete=models.CASCADE, null=True, blank=True
+    )
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    paid = models.BooleanField(default=False)
+    qr_code_token = models.UUIDField(default=uuid.uuid4, unique=True)

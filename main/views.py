@@ -8,6 +8,23 @@ import requests
 import json
 import os
 from datetime import datetime
+from django.http import JsonResponse
+from .models import Participant
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from .utils import send_qr_email
+
+
+def validate_qr(request, token):
+    try:
+        participant = Participant.objects.get(qr_code_token=token)
+        if participant.paid:
+            return JsonResponse({"status": "valid", "name": participant.name})
+        else:
+            return JsonResponse({"status": "not_paid"})
+    except Participant.DoesNotExist:
+        return JsonResponse({"status": "invalid"})
+
 
 now_iso = datetime.utcnow().isoformat() + "Z"  # z.B. '2025-06-03T12:34:56.789Z'
 
@@ -29,9 +46,16 @@ def anmeldung_view(request):
         form = Anmeldeformular(request.POST)
         if form.is_valid():
             anmeldung_obj = form.save()
+
+            participant = Participant.objects.create(
+                name=f"{anmeldung_obj.vorname} {anmeldung_obj.nachname}",
+                email=anmeldung_obj.email,
+                anmeldung=anmeldung_obj,  # neu
+            )
+
             context = {
                 "form": form,
-                "anmeldung_id": anmeldung_obj.id,
+                "anmeldung_id": participant.id,  # Nutze die ID vom Participant!
                 "PAYPAL_CLIENT_ID": settings.PAYPAL_CLIENT_ID,
             }
             return render(request, "main/anmeldung.html", context)
@@ -40,87 +64,6 @@ def anmeldung_view(request):
 
     context = {"form": form, "PAYPAL_CLIENT_ID": settings.PAYPAL_CLIENT_ID}
     return render(request, "main/anmeldung.html", context)
-
-
-def get_paypal_access_token():
-    response = requests.post(
-        f"{settings.PAYPAL_API_BASE_URL}/v1/oauth2/token",
-        auth=(settings.PAYPAL_CLIENT_ID, settings.PAYPAL_CLIENT_SECRET),
-        headers={"Accept": "application/json"},
-        data={"grant_type": "client_credentials"},
-    )
-    response.raise_for_status()
-    return response.json()["access_token"]
-
-
-@csrf_exempt
-def create_order(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            anmeldung_id = data.get("anmeldung_id")  # fehlt in deinem Beispiel
-            amount = data.get("amount", "0.01")
-
-            access_token = get_paypal_access_token()
-            headers = {
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {access_token}",
-            }
-
-            order_data = {
-                "intent": "CAPTURE",
-                "purchase_units": [
-                    {"amount": {"currency_code": "EUR", "value": amount}}
-                ],
-            }
-
-            response = requests.post(
-                f"{settings.PAYPAL_API_BASE_URL}/v2/checkout/orders",
-                headers=headers,
-                json=order_data,
-            )
-            response.raise_for_status()
-
-            paypal_response = response.json()
-
-            paypal_order_id = paypal_response.get("id")
-
-            if anmeldung_id and paypal_order_id:
-                try:
-                    anmeldung = Anmeldung.objects.get(id=anmeldung_id)
-                    anmeldung.paypal_order_id = paypal_order_id
-                    anmeldung.save()
-                except Anmeldung.DoesNotExist:
-                    pass  # Optional: Loggen, falls Anmeldung nicht gefunden wird
-
-            return JsonResponse(paypal_response)
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
-    return JsonResponse({"error": "Invalid method"}, status=405)
-
-
-@csrf_exempt
-def capture_order(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            order_id = data.get("orderID")
-
-            access_token = get_paypal_access_token()
-            headers = {
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {access_token}",
-            }
-
-            response = requests.post(
-                f"{settings.PAYPAL_API_BASE_URL}/v2/checkout/orders/{order_id}/capture",
-                headers=headers,
-            )
-            response.raise_for_status()
-            return JsonResponse(response.json())
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
-    return JsonResponse({"error": "Invalid method"}, status=405)
 
 
 def anmeldung_erfolg_view(request):
@@ -149,39 +92,27 @@ def anmeldung_ajax_view(request):
     return JsonResponse({"error": "Nur POST erlaubt"}, status=405)
 
 
-from supabase import create_client, Client
-
-
-def zahlung_erfolgreich(request):
+def zahlung_bestaetigen_view(request):
     anmeldung_id = request.GET.get("anmeldung_id")
-    paypal_order_id = request.GET.get("paypal_order_id")  # Oder andersherum übergeben!
 
-    url = os.getenv("SUPABASE_URL")
-    key = os.getenv("SUPABASE_KEY")
-    supabase = create_client(url, key)
+    if not anmeldung_id:
+        return HttpResponse("Ungültige Anmeldung", status=400)
 
-    if anmeldung_id and paypal_order_id:
-        now_iso = datetime.utcnow().isoformat() + "Z"
-        try:
-            response = (
-                supabase.table("anmeldungen")
-                .update(
-                    {
-                        "bezahlmethode": "paypal",
-                        "ist_bezahlt": True,
-                        "paypal_order_id": paypal_order_id,
-                        "zahlungsdatum": now_iso,
-                    }
-                )
-                .eq("id", int(anmeldung_id))
-                .execute()
-            )
-            print("Supabase-Update:", response)
-        except Exception as e:
-            print("Supabase-Fehler:", e)
-    else:
-        print("Anmeldung-ID oder PayPal-Order-ID fehlt.")
+    participant = get_object_or_404(Participant, id=anmeldung_id)
 
-    return render(
-        request, "main/zahlung_erfolgreich.html", {"anmeldung_id": anmeldung_id}
-    )
+    if not participant.paid:
+        participant.paid = True
+        participant.save()
+
+        # Auch die Anmeldung als bezahlt markieren
+        if participant.anmeldung:
+            participant.anmeldung.ist_bezahlt = True
+            participant.anmeldung.zahlungsdatum = datetime.now()
+            participant.anmeldung.save()
+
+        send_qr_email(participant)
+
+    return HttpResponse("Bezahlung bestätigt. QR-Code wurde per E-Mail verschickt.")
+
+
+from supabase import create_client, Client

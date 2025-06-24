@@ -37,7 +37,11 @@ def get_paypal_access_token():
         return response.json()["access_token"]
     except requests.exceptions.RequestException as e:
         error_response = e.response.text if e.response else "Keine Antwort erhalten."
-        logger.error("Fehler beim Abrufen des PayPal Access Tokens: %s", error_response, exc_info=True)
+        logger.error(
+            "Fehler beim Abrufen des PayPal Access Tokens: %s",
+            error_response,
+            exc_info=True,
+        )
         raise Exception("Konnte PayPal Access Token nicht abrufen.")
 
 
@@ -66,13 +70,15 @@ def create_paypal_order(request):
 
         order_data = {
             "intent": "CAPTURE",
-            "purchase_units": [{
-                "amount": {
-                    "currency_code": "EUR",
-                    "value": amount,
-                },
-                "description": f"Anmeldung für {anmeldung_obj.vorname} {anmeldung_obj.nachname} - {anmeldung_obj.termin}",
-            }],
+            "purchase_units": [
+                {
+                    "amount": {
+                        "currency_code": "EUR",
+                        "value": amount,
+                    },
+                    "description": f"Anmeldung für {anmeldung_obj.vorname} {anmeldung_obj.nachname} - {anmeldung_obj.termin}",
+                }
+            ],
             "application_context": {
                 "return_url": "https://deine-website.com/anmeldung-erfolgreich/",
                 "cancel_url": "https://deine-website.com/anmeldung-abgebrochen/",
@@ -82,7 +88,7 @@ def create_paypal_order(request):
         response = requests.post(
             f"{settings.PAYPAL_API_BASE_URL}/v2/checkout/orders",
             headers=headers,
-            json=order_data
+            json=order_data,
         )
         response.raise_for_status()
 
@@ -131,7 +137,9 @@ def capture_paypal_order(request):
             "Authorization": f"Bearer {access_token}",
         }
 
-        capture_url = f"{settings.PAYPAL_API_BASE_URL}/v2/checkout/orders/{order_id}/capture"
+        capture_url = (
+            f"{settings.PAYPAL_API_BASE_URL}/v2/checkout/orders/{order_id}/capture"
+        )
         response = requests.post(capture_url, headers=headers)
         response.raise_for_status()
 
@@ -151,7 +159,7 @@ def capture_paypal_order(request):
             anmeldung_obj.zahlungsdatum = datetime.datetime.now()
 
             # 🔸 QR-Code generieren & speichern
-            qr_data = f"Name: {anmeldung_obj.vorname} {anmeldung_obj.nachname}, Termin: {anmeldung_obj.termin}"
+            qr_data = f"ID: {anmeldung_obj.id}, Name: {anmeldung_obj.vorname} {anmeldung_obj.nachname}, Termin: {anmeldung_obj.termin}"
             qr_img = generate_qr_code(qr_data)
             qr_url = upload_qr_to_supabase(anmeldung_obj.id, qr_img)
             anmeldung_obj.qr_code_url = qr_url
@@ -180,11 +188,13 @@ Dein Team
                 fail_silently=False,
             )
 
-        return JsonResponse({
-            "id": capture_data.get("id"),
-            "status": status,
-            "bezahlmethode": payment_source,
-        })
+        return JsonResponse(
+            {
+                "id": capture_data.get("id"),
+                "status": status,
+                "bezahlmethode": payment_source,
+            }
+        )
 
     except json.JSONDecodeError:
         logger.error("Ungültiges JSON im Request-Body.", exc_info=True)

@@ -9,12 +9,14 @@ import tempfile
 # Supabase Initialisierung
 supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
+
 def generate_qr_code(data: str) -> BytesIO:
     qr = qrcode.make(data)
     byte_io = BytesIO()
     qr.save(byte_io, format="PNG")
     byte_io.seek(0)
     return byte_io
+
 
 def upload_qr_to_supabase(anmeldung_id: int, qr_image: BytesIO) -> str:
     filename = (

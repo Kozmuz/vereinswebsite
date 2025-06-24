@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from .views import validate_qr
+from main.views import qr_checkin_view
 
 urlpatterns = [
     path("", views.home),
@@ -17,4 +18,5 @@ urlpatterns = [
         views.zahlung_bestaetigen_view,
         name="zahlung_bestaetigen",
     ),
+    path("checkin/<int:anmeldung_id>/", qr_checkin_view, name="qr_checkin"),
 ]

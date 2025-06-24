@@ -12,6 +12,8 @@ from django.http import JsonResponse
 from .models import Participant
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.core.mail import send_mail
+from main.utils.qr_code_utils import generate_qr_code, upload_qr_to_supabase
 
 
 def validate_qr(request, token):
@@ -105,13 +107,58 @@ def zahlung_bestaetigen_view(request):
 
         # Auch die Anmeldung als bezahlt markieren
         if participant.anmeldung:
-            participant.anmeldung.ist_bezahlt = True
-            participant.anmeldung.zahlungsdatum = datetime.now()
-            participant.anmeldung.save()
+            anmeldung = participant.anmeldung
+            anmeldung.ist_bezahlt = True
+            anmeldung.zahlungsdatum = datetime.now()
 
-        send_qr_email(participant)
+            # ✅ QR-Code generieren und speichern
+            qr_data = f"Name: {anmeldung.vorname} {anmeldung.nachname}, Termin: {anmeldung.termin}, ID: {anmeldung.id}"
+            qr_img = generate_qr_code(qr_data)
+            qr_url = upload_qr_to_supabase(anmeldung.id, qr_img)
+            anmeldung.qr_code_url = qr_url
+            anmeldung.save()
+
+            # ✅ E-Mail senden
+            email_body = f"""
+Hallo {anmeldung.vorname},
+
+vielen Dank für deine Anmeldung und die erfolgreiche Zahlung!
+
+Hier ist dein QR-Code zur Teilnahme:
+{qr_url}
+
+Termin: {anmeldung.termin}
+Zahlungsdatum: {anmeldung.zahlungsdatum.strftime('%d.%m.%Y %H:%M')}
+
+Viele Grüße,
+Dein Team
+"""
+            send_mail(
+                subject="Anmeldebestätigung & QR-Code",
+                message=email_body,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[anmeldung.email],
+                fail_silently=False,
+            )
 
     return HttpResponse("Bezahlung bestätigt. QR-Code wurde per E-Mail verschickt.")
+
+
+def qr_checkin_view(request, anmeldung_id):
+    try:
+        anmeldung = Anmeldung.objects.get(id=anmeldung_id)
+
+        if anmeldung.ist_bezahlt:
+            return render(request, "checkin_valid.html", {"anmeldung": anmeldung})
+        else:
+            return render(
+                request, "checkin_invalid.html", {"grund": "Anmeldung nicht bezahlt"}
+            )
+
+    except Anmeldung.DoesNotExist:
+        return render(
+            request, "checkin_invalid.html", {"grund": "Anmeldung nicht gefunden"}
+        )
 
 
 from supabase import create_client, Client

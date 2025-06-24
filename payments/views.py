@@ -5,7 +5,7 @@ import datetime
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
-from .utils.qr_code_utils import generate_qr_code, upload_qr_to_supabase
+from main.utils.qr_code_utils import generate_qr_code, upload_qr_to_supabase
 from django.core.mail import send_mail
 from django.shortcuts import render
 
@@ -36,7 +36,9 @@ def get_paypal_access_token():
         response.raise_for_status()
         return response.json()["access_token"]
     except requests.exceptions.RequestException as e:
-        error_response_text = e.response.text if e.response else "Keine Antwort erhalten."
+        error_response_text = (
+            e.response.text if e.response else "Keine Antwort erhalten."
+        )
         logger.error(
             f"Fehler beim Abrufen des PayPal Access Tokens: {error_response_text}",
             exc_info=True,
@@ -101,7 +103,9 @@ def create_paypal_order(request):
             logger.error("Ungültiges JSON im Request-Body.", exc_info=True)
             return JsonResponse({"error": "Ungültiges JSON"}, status=400)
         except requests.exceptions.RequestException as e:
-            error_details = e.response.json() if e.response and e.response.content else str(e)
+            error_details = (
+                e.response.json() if e.response and e.response.content else str(e)
+            )
             logger.error(f"PayPal API Fehler: {error_details}", exc_info=True)
             return JsonResponse({"error": str(error_details)}, status=500)
         except Exception as e:
@@ -129,7 +133,9 @@ def capture_paypal_order(request):
                 return JsonResponse({"error": "Anmeldung nicht gefunden"}, status=404)
             except Anmeldung.MultipleObjectsReturned:
                 logger.error(f"Mehrfache Anmeldungen für Order ID {order_id}")
-                return JsonResponse({"error": "Mehrfache Anmeldungen gefunden"}, status=500)
+                return JsonResponse(
+                    {"error": "Mehrfache Anmeldungen gefunden"}, status=500
+                )
 
             access_token = get_paypal_access_token()
             headers = {
@@ -137,7 +143,9 @@ def capture_paypal_order(request):
                 "Authorization": f"Bearer {access_token}",
             }
 
-            capture_url = f"{settings.PAYPAL_API_BASE_URL}/v2/checkout/orders/{order_id}/capture"
+            capture_url = (
+                f"{settings.PAYPAL_API_BASE_URL}/v2/checkout/orders/{order_id}/capture"
+            )
             response = requests.post(capture_url, headers=headers)
             response.raise_for_status()
 
@@ -154,7 +162,9 @@ def capture_paypal_order(request):
             except (KeyError, IndexError):
                 pass
 
-            logger.info(f"Zahlung abgeschlossen. Status: {payment_status}, Methode: {payment_source}")
+            logger.info(
+                f"Zahlung abgeschlossen. Status: {payment_status}, Methode: {payment_source}"
+            )
 
             if payment_status == "COMPLETED":
                 anmeldung_obj.ist_bezahlt = True
@@ -165,7 +175,6 @@ def capture_paypal_order(request):
                 qr_img = generate_qr_code(qr_data)
                 qr_url = upload_qr_to_supabase(anmeldung_obj.id, qr_img)
                 anmeldung_obj.qr_code_url = qr_url
-
                 anmeldung_obj.save()
 
                 email_body = f"""
@@ -202,7 +211,9 @@ Dein Team
             logger.error("Ungültiges JSON im Request-Body.", exc_info=True)
             return JsonResponse({"error": "Ungültiges JSON"}, status=400)
         except requests.exceptions.RequestException as e:
-            error_details = e.response.json() if e.response and e.response.content else str(e)
+            error_details = (
+                e.response.json() if e.response and e.response.content else str(e)
+            )
             logger.error(f"Fehler bei PayPal-Abschluss: {error_details}", exc_info=True)
             return JsonResponse({"error": str(error_details)}, status=500)
         except Exception as e:

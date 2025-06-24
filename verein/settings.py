@@ -14,15 +14,11 @@ import os
 import dj_database_url  # for simplified DB connections - JK
 from decouple import config  # Importiere config von decouple
 from dotenv import load_dotenv
-from supabase import create_client
-from dotenv import load_dotenv
 
 load_dotenv()
 
-url = os.getenv("SUPABASE_URL")
-key = os.getenv("SUPABASE_KEY")
-
-supabase = create_client(url, key)
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 from pathlib import Path
 

@@ -12,7 +12,6 @@ from django.http import JsonResponse
 from .models import Participant
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from .utils import send_qr_email
 
 
 def validate_qr(request, token):

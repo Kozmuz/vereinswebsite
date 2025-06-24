@@ -23,6 +23,9 @@ class Anmeldung(models.Model):
         return f"{self.vorname} {self.nachname} - {self.termin}"
 
 
+qr_code_url = models.URLField(null=True, blank=True)
+
+
 class Participant(models.Model):
     anmeldung = models.ForeignKey(
         "Anmeldung", on_delete=models.CASCADE, null=True, blank=True

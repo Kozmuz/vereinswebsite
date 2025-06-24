@@ -16,6 +16,9 @@
   <p id="zahlung-text" style="display: none; font-weight: bold;">
     Ihre Anmeldung Nr. {{ anmeldung_id }} wurde erfolgreich bezahlt.
   </p>
+  <div id="email-hinweis" class="alert alert-success mt-4" style="display: none;">
+  📧 Öffnen Sie Ihre E-Mails – dort finden Sie Ihren persönlichen QR-Code zur Veranstaltung.
+</div>
 
   <a href="/">Zurück zur Startseite</a>
 
@@ -76,6 +79,8 @@
 
               // ⛔️ Verstecke PayPal-Button
               document.getElementById('paypal-button-container').style.display = 'none'
+
+              document.getElementById('email-hinweis').style.display = 'block'
             })
         }
       })

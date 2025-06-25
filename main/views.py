@@ -114,7 +114,7 @@ def zahlung_bestaetigen_view(request):
 
             # QR-Code generieren & hochladen
             anmeldung_obj = anmeldung
-            qr_data = f"https://vereinswebsite.onrender.com/checkin/{anmeldung_obj.qr_code_token}"  # oder id, wenn du noch kein token hast
+            qr_data = f"https://vereinswebsite.onrender.com/validate/{participant.qr_code_token}"
             qr_img = generate_qr_code(qr_data)
             qr_url = upload_qr_to_supabase(anmeldung_obj.id, qr_img)
 

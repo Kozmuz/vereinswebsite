@@ -14,6 +14,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from main.utils.qr_code_utils import generate_qr_code, upload_qr_to_supabase
+from django.shortcuts import redirect
 
 
 def validate_qr(request, token):
@@ -59,7 +60,7 @@ def anmeldung_view(request):
                 "anmeldung_id": participant.id,  # Nutze die ID vom Participant!
                 "PAYPAL_CLIENT_ID": settings.PAYPAL_CLIENT_ID,
             }
-            return render(request, "main/anmeldung.html", context)
+            return redirect(f"/anmeldung-erfolgreich/?anmeldung_id={participant.id}")
     else:
         form = Anmeldeformular()
 
@@ -155,7 +156,9 @@ def qr_checkin_view(request, anmeldung_id):
             return render(request, "main/checkin_valid.html", {"anmeldung": anmeldung})
         else:
             return render(
-                request, "main/checkin_invalid.html", {"grund": "Anmeldung nicht bezahlt"}
+                request,
+                "main/checkin_invalid.html",
+                {"grund": "Anmeldung nicht bezahlt"},
             )
 
     except Anmeldung.DoesNotExist:

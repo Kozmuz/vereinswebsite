@@ -24,8 +24,6 @@ class Anmeldung(models.Model):
         return f"{self.vorname} {self.nachname} - {self.termin}"
 
 
-
-
 class Participant(models.Model):
     anmeldung = models.ForeignKey(
         "Anmeldung", on_delete=models.CASCADE, null=True, blank=True

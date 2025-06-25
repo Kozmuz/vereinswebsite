@@ -8,7 +8,6 @@ import requests
 import json
 import os
 from datetime import datetime
-from django.http import JsonResponse
 from .models import Participant
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -21,11 +20,14 @@ def validate_qr(request, token):
     try:
         participant = Participant.objects.get(qr_code_token=token)
         if participant.paid:
-            return JsonResponse({"status": "valid", "name": participant.name})
+            anmeldung = participant.anmeldung
+            return render(request, "main/checkin_valid.html", {"anmeldung": anmeldung})
         else:
-            return JsonResponse({"status": "not_paid"})
+            return render(
+                request, "main/checkin_invalid.html", {"grund": "Zahlung ausstehend"}
+            )
     except Participant.DoesNotExist:
-        return JsonResponse({"status": "invalid"})
+        return render(request, "main/checkin_invalid.html", {"grund": "Token ungültig"})
 
 
 now_iso = datetime.utcnow().isoformat() + "Z"  # z.B. '2025-06-03T12:34:56.789Z'
@@ -60,7 +62,9 @@ def anmeldung_view(request):
                 "anmeldung_id": participant.id,  # Nutze die ID vom Participant!
                 "PAYPAL_CLIENT_ID": settings.PAYPAL_CLIENT_ID,
             }
-            return redirect(f"/anmeldung-erfolgreich/?anmeldung_id={participant.id}")
+            return redirect(
+                f"{reverse('anmeldung_erfolg')}?anmeldung_id={participant.id}"
+            )
     else:
         form = Anmeldeformular()
 

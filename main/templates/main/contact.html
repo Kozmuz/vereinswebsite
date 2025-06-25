@@ -9,15 +9,18 @@
 </head>
 
 <body>
-    <nav class="nav-container">
-        <img src="{% static 'css/amslogo.png' %}" alt="Vereinslogo" class="logo">
-        <ul class="nav-links">
-            <li><a href="/">Home</a></li>
-            <li><a href="/about/">Über uns</a></li>
-            <a href="{% url 'anmeldung' %}" class="btn">Jetzt zur Veranstaltung anmelden</a>
-            <a href="/contact/" class="btn">Jetzt Kontakt aufnehmen</a>
-        </ul>
-    </nav>
+    <div class="navigation">
+        <div class="logo">
+            <h3>Akademische Motorsportgruppe Stuttgart e.V.</h3>
+        </div>
+
+        <div class="menu-items">
+            <a href="/">Home</a>
+            <a href="/about/">Über uns</a>
+            <a href="{% url 'anmeldung' %}" class="btn">Anmelden</a>
+            <a href="/contact/" class="btn">Kontakt</a>
+        </div>    
+    </div>
 
     <h1>Kontakt aufnehmen</h1>
     <p>Du kannst uns über folgende E-Mail-Adressen erreichen:</p>

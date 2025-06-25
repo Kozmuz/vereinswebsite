@@ -161,3 +161,5 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "maganiac13@gmail.com"
 EMAIL_HOST_PASSWORD = "iksh glzi tnwo qjco"  # Achtung: Kein normales Passwort!
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+VALIDATE_BASE_URL = "https://vereinswebsite.onrender.com"

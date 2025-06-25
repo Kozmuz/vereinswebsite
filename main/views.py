@@ -12,7 +12,7 @@ from .models import Participant
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
-from main.utils.qr_code_utils import generate_qr_code, upload_qr_to_supabase
+from main.utils.qr_code_utils import generate_qr_code, upload_qr_to_supabase, generate_qr_code_url
 from django.shortcuts import redirect
 from django.urls import reverse
 
@@ -119,9 +119,9 @@ def zahlung_bestaetigen_view(request):
 
             # QR-Code generieren & hochladen
             anmeldung_obj = anmeldung
-            qr_data = f"https://vereinswebsite.onrender.com/validate/{participant.qr_code_token}"
+            qr_data = generate_qr_code_url(participant.qr_code_token)
             qr_img = generate_qr_code(qr_data)
-            qr_url = upload_qr_to_supabase(anmeldung_obj.id, qr_img)
+            qr_url = upload_qr_to_supabase(participant.qr_code_token, qr_img)
 
             # URL in DB speichern
             anmeldung_obj.qr_code_url = qr_url
@@ -160,11 +160,7 @@ def qr_checkin_view(request, anmeldung_id):
         if anmeldung.ist_bezahlt:
             return render(request, "main/checkin_valid.html", {"anmeldung": anmeldung})
         else:
-            return render(
-                request,
-                "main/checkin_invalid.html",
-                {"grund": "Anmeldung nicht bezahlt"},
-            )
+            return render(request,"main/checkin_invalid.html",{"grund": "Anmeldung nicht bezahlt"})
 
     except Anmeldung.DoesNotExist:
         return render(

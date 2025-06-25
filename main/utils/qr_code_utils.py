@@ -11,7 +11,6 @@ import tempfile
 supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
 def generate_qr_code_url(token: str) -> str:
-    """Erstellt die URL, die im QR-Code codiert wird."""
     return f"{settings.VALIDATE_BASE_URL}/validate/{token}"
 
 def generate_qr_code(data: str) -> BytesIO:

@@ -14,6 +14,7 @@ from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from main.utils.qr_code_utils import generate_qr_code, upload_qr_to_supabase
 from django.shortcuts import redirect
+from django.urls import reverse
 
 
 def validate_qr(request, token):
@@ -21,13 +22,13 @@ def validate_qr(request, token):
         participant = Participant.objects.get(qr_code_token=token)
         if participant.paid:
             anmeldung = participant.anmeldung
-            return render(request, "main/checkin_valid.html", {"anmeldung": anmeldung})
+            return render(request, "main/templates/main/checkin_valid.html", {"anmeldung": anmeldung})
         else:
             return render(
-                request, "main/checkin_invalid.html", {"grund": "Zahlung ausstehend"}
+                request, "main/templates/main/checkin_invalid.html", {"grund": "Zahlung ausstehend"}
             )
     except Participant.DoesNotExist:
-        return render(request, "main/checkin_invalid.html", {"grund": "Token ungültig"})
+        return render(request, "main/templates/main/checkin_invalid.html", {"grund": "Token ungültig"})
 
 
 now_iso = datetime.utcnow().isoformat() + "Z"  # z.B. '2025-06-03T12:34:56.789Z'
@@ -157,17 +158,17 @@ def qr_checkin_view(request, anmeldung_id):
         anmeldung = Anmeldung.objects.get(id=anmeldung_id)
 
         if anmeldung.ist_bezahlt:
-            return render(request, "main/checkin_valid.html", {"anmeldung": anmeldung})
+            return render(request, "main/templates/main/checkin_valid.html", {"anmeldung": anmeldung})
         else:
             return render(
                 request,
-                "main/checkin_invalid.html",
+                "main/templates/main/checkin_invalid.html",
                 {"grund": "Anmeldung nicht bezahlt"},
             )
 
     except Anmeldung.DoesNotExist:
         return render(
-            request, "main/checkin_invalid.html", {"grund": "Anmeldung nicht gefunden"}
+            request, "main/templates/main/checkin_invalid.html", {"grund": "Anmeldung nicht gefunden"}
         )
 
 

@@ -111,12 +111,15 @@ def zahlung_bestaetigen_view(request):
             anmeldung.ist_bezahlt = True
             anmeldung.zahlungsdatum = datetime.now()
 
-            # ✅ QR-Code generieren und speichern
-            qr_data = f"Name: {anmeldung.vorname} {anmeldung.nachname}, Termin: {anmeldung.termin}, ID: {anmeldung.id}"
+            # QR-Code generieren & hochladen
+            anmeldung_obj = anmeldung
+            qr_data = f"https://vereinswebsite.onrender.com/checkin/{anmeldung_obj.qr_code_token}"  # oder id, wenn du noch kein token hast
             qr_img = generate_qr_code(qr_data)
-            qr_url = upload_qr_to_supabase(anmeldung.id, qr_img)
-            anmeldung.qr_code_url = qr_url
-            anmeldung.save()
+            qr_url = upload_qr_to_supabase(anmeldung_obj.id, qr_img)
+
+            # URL in DB speichern
+            anmeldung_obj.qr_code_url = qr_url
+            anmeldung_obj.save()
 
             # ✅ E-Mail senden
             email_body = f"""

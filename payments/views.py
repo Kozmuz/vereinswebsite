@@ -159,10 +159,8 @@ def capture_paypal_order(request):
             anmeldung_obj.zahlungsdatum = datetime.datetime.now()
 
             # 🔸 QR-Code generieren & speichern
-            checkin_url = (
-                f"https://vereinswebsite.onrender.com/checkin/{anmeldung_obj.id}"
-            )
-            qr_img = generate_qr_code(checkin_url)
+            qr_data = f"ID: {anmeldung_obj.id}, Name: {anmeldung_obj.vorname} {anmeldung_obj.nachname}, Termin: {anmeldung_obj.termin}"
+            qr_img = generate_qr_code(qr_data)
             qr_url = upload_qr_to_supabase(anmeldung_obj.id, qr_img)
             anmeldung_obj.qr_code_url = qr_url
             anmeldung_obj.save()

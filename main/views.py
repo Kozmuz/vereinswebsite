@@ -152,15 +152,15 @@ def qr_checkin_view(request, anmeldung_id):
         anmeldung = Anmeldung.objects.get(id=anmeldung_id)
 
         if anmeldung.ist_bezahlt:
-            return render(request, "checkin_valid.html", {"anmeldung": anmeldung})
+            return render(request, "main/checkin_valid.html", {"anmeldung": anmeldung})
         else:
             return render(
-                request, "checkin_invalid.html", {"grund": "Anmeldung nicht bezahlt"}
+                request, "main/checkin_invalid.html", {"grund": "Anmeldung nicht bezahlt"}
             )
 
     except Anmeldung.DoesNotExist:
         return render(
-            request, "checkin_invalid.html", {"grund": "Anmeldung nicht gefunden"}
+            request, "main/checkin_invalid.html", {"grund": "Anmeldung nicht gefunden"}
         )
 
 

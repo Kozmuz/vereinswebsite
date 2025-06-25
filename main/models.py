@@ -18,12 +18,12 @@ class Anmeldung(models.Model):
     )
     ist_bezahlt = models.BooleanField(default=False)
     zahlungsdatum = models.DateTimeField(null=True, blank=True)
+    qr_code_url = models.URLField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.vorname} {self.nachname} - {self.termin}"
 
 
-qr_code_url = models.URLField(null=True, blank=True)
 
 
 class Participant(models.Model):

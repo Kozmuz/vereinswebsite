@@ -48,6 +48,14 @@ body {
     transition: background-color 0.3s ease;
 }
 
+.qr-title h1 {
+    margin-top: 10%;
+    font-size: 7em;
+    color: #333333;
+    letter-spacing: normal;
+    font-weight: bold;
+}
+
 /* Formular Container */
 form {
     width: 100%;

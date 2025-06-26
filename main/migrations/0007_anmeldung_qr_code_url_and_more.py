@@ -10,11 +10,11 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name="anmeldung",
-            name="qr_code_url",
-            field=models.URLField(blank=True, null=True),
-        ),
+       # migrations.AddField(
+        #    model_name="anmeldung",
+         #   name="qr_code_url",
+          #  field=models.URLField(blank=True, null=True),
+        #),
         migrations.AlterField(
             model_name="participant",
             name="qr_code_token",

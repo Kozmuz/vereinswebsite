@@ -12,12 +12,11 @@ urlpatterns = [
     path(
         "anmeldung-erfolgreich/", views.anmeldung_erfolg_view, name="anmeldung_erfolg"
     ),
-    path("validate/<uuid:token>/", validate_qr, name="validate_qr"),
     path(
         "zahlung-bestaetigen/",
         views.zahlung_bestaetigen_view,
         name="zahlung_bestaetigen",
     ),
     path("scanner/", views.qr_scanner_view, name="qr_scanner"),
-    path("validate/<str:token>/", views.validate_qr, name="validate_qr"),
+    path("validate/<path:token>/", views.validate_qr, name="validate_qr"),
 ]

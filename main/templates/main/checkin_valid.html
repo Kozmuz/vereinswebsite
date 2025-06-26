@@ -3,13 +3,29 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Check-in Bestätigung</title>
+  <title>Check-in gültig</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    h1 {
+      color: green;
+    }
+
+    p {
+      font-size: 1.2em;
+    }
+  </style>
 </head>
 
 <body>
-  <h1 style="color: green;">✅ Anmeldung gültig</h1>
-  <p>Willkommen, {{ anmeldung.vorname }} {{ anmeldung.nachname }}!</p>
-  <p>Termin: {{ anmeldung.termin }}</p>
+  <h1>✅ Anmeldung gültig</h1>
+  {% if participant %}
+  <p>Name: {{ participant.name }}</p>
+  {% endif %}
 </body>
 
 </html>

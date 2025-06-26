@@ -1,13 +1,14 @@
 import json
-import requests
+import uuid
 import logging
-import datetime
+import requests
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.core.mail import send_mail
 from django.shortcuts import render
 from django.utils import timezone
+
 from main.utils.qr_code_utils import generate_qr_code, upload_qr_to_supabase
 from main.models import Anmeldung, Participant
 
@@ -60,7 +61,7 @@ def create_paypal_order(request):
 
         anmeldung_obj = Anmeldung.objects.get(id=anmeldung_id)
 
-        amount = "0.01"
+        amount = "0.01"  # <- Hier ggf. dynamisch berechnen
         access_token = get_paypal_access_token()
 
         headers = {
@@ -131,7 +132,6 @@ def capture_paypal_order(request):
         except Anmeldung.MultipleObjectsReturned:
             return JsonResponse({"error": "Mehrfache Anmeldungen gefunden"}, status=500)
 
-        # PayPal Access Token holen (deine Funktion)
         access_token = get_paypal_access_token()
 
         headers = {
@@ -139,12 +139,12 @@ def capture_paypal_order(request):
             "Authorization": f"Bearer {access_token}",
         }
 
-        # Capture-Request an PayPal schicken
-        capture_url = f"{settings.PAYPAL_API_BASE_URL}/v2/checkout/orders/{order_id}/capture"
+        capture_url = (
+            f"{settings.PAYPAL_API_BASE_URL}/v2/checkout/orders/{order_id}/capture"
+        )
         response = requests.post(capture_url, headers=headers)
         response.raise_for_status()
 
-        # Antwort der API als JSON
         capture_data = response.json()
 
         status = capture_data.get("status")
@@ -161,19 +161,23 @@ def capture_paypal_order(request):
             anmeldung_obj.bezahlmethode = payment_source
             anmeldung_obj.zahlungsdatum = timezone.now()
 
-            participant, _ = Participant.objects.get_or_create(
+            token = uuid.uuid4()  # Für DB (UUIDField)
+            qr_string = str(token)
+
+            participant, created = Participant.objects.get_or_create(
                 anmeldung=anmeldung_obj,
                 defaults={
                     "name": f"{anmeldung_obj.vorname} {anmeldung_obj.nachname}",
-                    "email": anmeldung_obj.email
-                }
+                    "email": anmeldung_obj.email,
+                    "qr_code_token": token,
+                },
             )
 
-            token = f"ID: {participant.id}, Name: {participant.name}, Termin: {anmeldung_obj.termin.strftime('%Y-%m-%d')}"
-            participant.qr_code_token = token
-            participant.save()
+            if not created:
+                participant.qr_code_token = token
+                participant.save()
 
-            qr_img = generate_qr_code(token)
+            qr_img = generate_qr_code(qr_string)  # Lesbare Daten im QR
             qr_url = upload_qr_to_supabase(str(participant.id), qr_img)
 
             anmeldung_obj.qr_code_url = qr_url
@@ -219,4 +223,3 @@ Dein Team
     except Exception as e:
         logger.critical("Unerwarteter Fehler: %s", e, exc_info=True)
         return JsonResponse({"error": str(e)}, status=500)
-

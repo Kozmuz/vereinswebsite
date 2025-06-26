@@ -1,25 +1,19 @@
-from django.shortcuts import render
+import re
+from django.shortcuts import render, get_object_or_404, redirect
 from django.conf import settings
 from .forms import Anmeldeformular
-from .models import Anmeldung
-from django.http import JsonResponse
+from .models import Anmeldung, Participant
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-import requests
-import json
-import os
-from datetime import datetime
-from .models import Participant
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
+from django.urls import reverse
+import json
+from datetime import datetime
 from main.utils.qr_code_utils import (
     generate_qr_code,
     upload_qr_to_supabase,
     generate_qr_code_url,
 )
-from django.shortcuts import redirect
-from django.urls import reverse
-from django.shortcuts import render
 
 
 def qr_scanner_view(request):
@@ -27,46 +21,17 @@ def qr_scanner_view(request):
 
 
 def validate_qr(request, token):
-    print("⛳ QR-Inhalt:", token)
-    try:
-        # Erwartetes Format:
-        # "ID: 42, Name: Kosmas Mathiopoulos, Termin: 2025-06-25"
-
-        parts = token.split(",")
-        if len(parts) < 2:
-            raise ValueError("Unvollständiger QR-Code")
-
-        # Einzelne Werte extrahieren
-        id_str = parts[0].strip().replace("ID:", "").strip()
-        name_qr = parts[1].strip().replace("Name:", "").strip()
-        # Optional: termin = parts[2].strip().replace("Termin:", "").strip()
-
-        # Participant aus DB laden
-        participant = Participant.objects.get(id=int(id_str))
-        name_db = participant.name.strip()
-
-        # Name vergleichen
-        if sorted(name_qr.lower().split()) != sorted(name_db.lower().split()):
-            return render(
-                request,
-                "main/checkin_invalid.html",
-                {"grund": "Name stimmt nicht mit ID überein"},
-            )
-
-        # Zahlung prüfen
-        if participant.paid:
-            return render(
-                request, "main/checkin_valid.html", {"anmeldung": participant.anmeldung}
-            )
-        else:
-            return render(
-                request, "main/checkin_invalid.html", {"grund": "Zahlung ausstehend"}
-            )
-
-    except (Participant.DoesNotExist, ValueError):
+    if not re.match(r"^[0-9a-fA-F\-]{36}$", token):
         return render(
-            request, "main/checkin_invalid.html", {"grund": "Ungültiger QR-Code"}
+            request, "main/checkin_invalid.html", {"grund": "Ungültiges Token-Format"}
         )
+
+    try:
+        participant = Participant.objects.get(qr_code_token=str(token))
+        return render(request, "main/checkin_valid.html", {"participant": participant})
+    except Participant.DoesNotExist:
+        grund = f"Ungültiger QR-Code: Teilnehmer mit Token '{token}' nicht gefunden."
+        return render(request, "main/checkin_invalid.html", {"grund": grund})
 
 
 now_iso = datetime.utcnow().isoformat() + "Z"  # z.B. '2025-06-03T12:34:56.789Z'
@@ -208,6 +173,3 @@ def qr_checkin_view(request, anmeldung_id):
         return render(
             request, "main/checkin_invalid.html", {"grund": "Anmeldung nicht gefunden"}
         )
-
-
-from supabase import create_client, Client

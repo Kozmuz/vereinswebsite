@@ -18,5 +18,6 @@ urlpatterns = [
         views.zahlung_bestaetigen_view,
         name="zahlung_bestaetigen",
     ),
-    path('validate/<str:token>/', validate_qr, name='validate_qr')
+    path("scanner/", views.qr_scanner_view, name="qr_scanner"),
+    path("validate/<str:token>/", views.validate_qr, name="validate_qr"),
 ]

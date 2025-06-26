@@ -1,115 +1,117 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="de">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Anmeldung</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
-  </head>
 
-  <body>
-    <div class="navigation">
-        <div class="logo">
-            <h3>Akademische Motorsportgruppe Stuttgart e.V.</h3>
-        </div>
+<head>
+  <meta charset="UTF-8" />
+  <title>Anmeldung</title>
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+</head>
 
-        <div class="menu-items">
-            <a href="/">Home</a>
-            <a href="/about/">Über uns</a>
-            <a href="{% url 'anmeldung' %}" class="btn">Anmelden</a>
-            <a href="/contact/" class="btn">Kontakt</a>
-        </div>    
+<body>
+  <div class="navigation">
+    <div class="logo">
+      <h3>Akademische Motorsportgruppe Stuttgart e.V.</h3>
     </div>
 
-    <h1>Anmeldung zu den Veranstaltungen</h1>
-    <form method="post">
-      {% csrf_token %}
+    <div class="menu-items">
+      <a href="/">Home</a>
+      <a href="/about/">Über uns</a>
+      <a href="{% url 'anmeldung' %}" class="btn">Anmelden</a>
+      <a href="/contact/" class="btn">Kontakt</a>
+    </div>
+  </div>
 
-      <label for="id_vorname">Vorname:</label>
-      {{ form.vorname }}
-      <p>
-        <label for="id_nachname">Nachname:</label>
-        {{ form.nachname }}
-      </p>
-      <p>
-        <label for="id_email">E-Mail:</label>
-        {{ form.email }}
-      </p>
-      <p>
-        <label for="id_bemerkung">Bemerkung:</label>
-        {{ form.bemerkung }}
-      </p>
-      <p>
-        <label for="id_termin">Termin:</label>
-        {{ form.termin }} {# KORREKT: Nur Django-Feld verwenden #}
+  <h1>Anmeldung zu den Veranstaltungen</h1>
+  <form method="post">
+    {% csrf_token %}
 
-        <label for="id_fahrzeugtyp">Fahrzeugtyp:</label>
-        {{ form.fahrzeugtyp }} {# KORREKT: Nur Django-Feld verwenden #}
-      </p>
-      <p>
-        <button type="button" id="absenden-button">Jetzt anmelden</button>
-      </p>
-    </form>
+    <label for="id_vorname">Vorname:</label>
+    {{ form.vorname }}
+    <p>
+      <label for="id_nachname">Nachname:</label>
+      {{ form.nachname }}
+    </p>
+    <p>
+      <label for="id_email">E-Mail:</label>
+      {{ form.email }}
+    </p>
+    <p>
+      <label for="id_bemerkung">Bemerkung:</label>
+      {{ form.bemerkung }}
+    </p>
+    <p>
+      <label for="id_termin">Termin:</label>
+      {{ form.termin }} {# KORREKT: Nur Django-Feld verwenden #}
 
-<input type="hidden" name="bezahlmethode" id="id_bezahlmethode" value="paypal" />
+      <label for="id_fahrzeugtyp">Fahrzeugtyp:</label>
+      {{ form.fahrzeugtyp }} {# KORREKT: Nur Django-Feld verwenden #}
+    </p>
+    <p>
+      <button type="button" id="absenden-button">Jetzt anmelden</button>
+    </p>
+  </form>
 
-   <script>
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== "") {
-      const cookies = document.cookie.split(";");
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === name + "=") {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
+  <input type="hidden" name="bezahlmethode" id="id_bezahlmethode" value="paypal" />
+
+  <script>
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === name + "=") {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
         }
       }
+      return cookieValue;
     }
-    return cookieValue;
-  }
 
-  document.getElementById("absenden-button").addEventListener("click", function () {
-    const csrfToken = getCookie("csrftoken");
+    document.getElementById("absenden-button").addEventListener("click", function () {
+      const csrfToken = getCookie("csrftoken");
 
-    const data = {
-      vorname: document.querySelector("#id_vorname").value,
-      nachname: document.querySelector("#id_nachname").value,
-      email: document.querySelector("#id_email").value,
-      bemerkung: document.querySelector("#id_bemerkung").value,
-      termin: document.querySelector("#id_termin").value,
-      fahrzeugtyp: document.querySelector("#id_fahrzeugtyp").value,
-      bezahlmethode: "paypal"
-    };
+      const data = {
+        vorname: document.querySelector("#id_vorname").value,
+        nachname: document.querySelector("#id_nachname").value,
+        email: document.querySelector("#id_email").value,
+        bemerkung: document.querySelector("#id_bemerkung").value,
+        termin: document.querySelector("#id_termin").value,
+        fahrzeugtyp: document.querySelector("#id_fahrzeugtyp").value,
+        bezahlmethode: "paypal"
+      };
 
-    fetch("/anmeldung/ajax/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": csrfToken
-      },
-      body: JSON.stringify(data)
-    })
-      .then((response) => response.json())
-      .then((result) => {
-        if (result.anmeldung_id) {
-          // ✅ Zuerst: Bezahlung bestätigen
-          fetch("/zahlung-bestaetigen/?anmeldung_id=" + result.anmeldung_id)
-            .then((response) => response.text())
-            .then((text) => {
-              // ✅ Dann zur Erfolgsseite weiterleiten
-              window.location.href = `/anmeldung-erfolgreich/?anmeldung_id=${result.anmeldung_id}`;
-            });
-        } else {
-          alert("Fehler bei der Anmeldung.");
-          console.error(result);
-        }
+      fetch("/anmeldung/ajax/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken
+        },
+        body: JSON.stringify(data)
       })
-      .catch((error) => {
-        console.error("Fehler beim Speichern:", error);
-        alert("Anmeldung konnte nicht gespeichert werden.");
-      });
-  });
-</script>
-  </body>
+        .then((response) => response.json())
+        .then((result) => {
+          if (result.anmeldung_id) {
+            // ✅ Zuerst: Bezahlung bestätigen
+            fetch("/zahlung-bestaetigen/?anmeldung_id=" + result.anmeldung_id)
+              .then((response) => response.text())
+              .then((text) => {
+                // ✅ Dann zur Erfolgsseite weiterleiten
+                window.location.href = `/anmeldung-erfolgreich/?anmeldung_id=${result.anmeldung_id}`;
+              });
+          } else {
+            alert("Fehler bei der Anmeldung.");
+            console.error(result);
+          }
+        })
+        .catch((error) => {
+          console.error("Fehler beim Speichern:", error);
+          alert("Anmeldung konnte nicht gespeichert werden.");
+        });
+    });
+  </script>
+</body>
+
 </html>

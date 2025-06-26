@@ -1,3 +1,15 @@
 sb-rpox4741681076@personal.example.com
 
 7mv-p&Bt
+
+
+Zusammenfassung:
+Kurz:
+
+capture_data kommt von PayPal.
+
+Hole dir einen Access Token mit get_paypal_access_token().
+
+Mach den Capture-POST-Request an PayPal mit diesem Token.
+
+Nutze die Antwort (capture_data) um deinen Status zu prüfen und QR-Code zu generieren.

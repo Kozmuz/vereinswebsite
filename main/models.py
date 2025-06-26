@@ -1,6 +1,4 @@
 from django.db import models
-import uuid
-from django.db import models
 
 
 class Anmeldung(models.Model):
@@ -31,4 +29,4 @@ class Participant(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField()
     paid = models.BooleanField(default=False)
-    qr_code_token = models.UUIDField(default=uuid.uuid4, unique=True)
+    qr_code_token = models.CharField(max_length=255, blank=True, null=True)

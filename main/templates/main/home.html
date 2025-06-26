@@ -9,7 +9,8 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
 </head>
 
 <body>
@@ -23,17 +24,21 @@
             <a href="/about/">Über uns</a>
             <a href="{% url 'anmeldung' %}" class="btn">Anmelden</a>
             <a href="/contact/" class="btn">Kontakt</a>
-        </div>    
+        </div>
     </div>
 
     <!-- Hauptinhalt -->
     <div class="title">
         <h1>Driver wanted.</h1>
     </div>
-    
+
     <div class="subtitle">
         <p>Your motorsport journey starts here.</p>
     </div>
+
+    <a href="{% url 'qr_scanner' %}">
+        <button>QR-Code scannen</button>
+    </a>
 
 </body>
 

@@ -10,8 +10,11 @@ import tempfile
 # Supabase Initialisierung
 supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
+
 def generate_qr_code_url(token: str) -> str:
-    return f"{settings.VALIDATE_BASE_URL}/validate/{token}"
+    # Einfacher Return, kann bei Bedarf angepasst werden
+    return token
+
 
 def generate_qr_code(data: str) -> BytesIO:
     """Erzeugt ein QR-Code PNG-Bild als BytesIO-Objekt."""
@@ -20,6 +23,7 @@ def generate_qr_code(data: str) -> BytesIO:
     qr.save(byte_io, format="PNG")
     byte_io.seek(0)
     return byte_io
+
 
 def upload_qr_to_supabase(participant_token: str, qr_image: BytesIO) -> str:
     """Lädt das QR-Code-Bild zu Supabase hoch und gibt die öffentliche URL zurück."""

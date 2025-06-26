@@ -7,9 +7,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.core.mail import send_mail
 from django.shortcuts import render
-
+from django.utils import timezone
 from main.utils.qr_code_utils import generate_qr_code, upload_qr_to_supabase
-from main.models import Anmeldung
+from main.models import Anmeldung, Participant
 
 logger = logging.getLogger(__name__)
 
@@ -131,23 +131,26 @@ def capture_paypal_order(request):
         except Anmeldung.MultipleObjectsReturned:
             return JsonResponse({"error": "Mehrfache Anmeldungen gefunden"}, status=500)
 
+        # PayPal Access Token holen (deine Funktion)
         access_token = get_paypal_access_token()
+
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {access_token}",
         }
 
-        capture_url = (
-            f"{settings.PAYPAL_API_BASE_URL}/v2/checkout/orders/{order_id}/capture"
-        )
+        # Capture-Request an PayPal schicken
+        capture_url = f"{settings.PAYPAL_API_BASE_URL}/v2/checkout/orders/{order_id}/capture"
         response = requests.post(capture_url, headers=headers)
         response.raise_for_status()
 
+        # Antwort der API als JSON
         capture_data = response.json()
+
         status = capture_data.get("status")
         payment_source = "paypal"
-
         ps = capture_data.get("payment_source", {})
+
         if "card" in ps:
             payment_source = "kreditkarte"
         elif "bank_account" in ps:
@@ -156,16 +159,26 @@ def capture_paypal_order(request):
         if status == "COMPLETED":
             anmeldung_obj.ist_bezahlt = True
             anmeldung_obj.bezahlmethode = payment_source
-            anmeldung_obj.zahlungsdatum = datetime.datetime.now()
+            anmeldung_obj.zahlungsdatum = timezone.now()
 
-            # 🔸 QR-Code generieren & speichern
-            qr_data = f"{settings.VALIDATE_BASE_URL}/validate/{anmeldung_obj.qr_code_token}"
-            qr_img = generate_qr_code(qr_data)
-            qr_url = upload_qr_to_supabase(anmeldung_obj.id, qr_img)
+            participant, _ = Participant.objects.get_or_create(
+                anmeldung=anmeldung_obj,
+                defaults={
+                    "name": f"{anmeldung_obj.vorname} {anmeldung_obj.nachname}",
+                    "email": anmeldung_obj.email
+                }
+            )
+
+            token = f"ID: {participant.id}, Name: {participant.name}, Termin: {anmeldung_obj.termin.strftime('%Y-%m-%d')}"
+            participant.qr_code_token = token
+            participant.save()
+
+            qr_img = generate_qr_code(token)
+            qr_url = upload_qr_to_supabase(str(participant.id), qr_img)
+
             anmeldung_obj.qr_code_url = qr_url
             anmeldung_obj.save()
 
-            # 🔸 Bestätigung per E-Mail versenden
             email_body = f"""
 Hallo {anmeldung_obj.vorname},
 
@@ -206,3 +219,4 @@ Dein Team
     except Exception as e:
         logger.critical("Unerwarteter Fehler: %s", e, exc_info=True)
         return JsonResponse({"error": str(e)}, status=500)
+

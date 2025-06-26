@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>QR-Scanner</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+
+<body>
+    <h1>QR-Code scannen</h1>
+    <div id="reader" style="width: 300px;"></div>
+    <script>
+        function onScanSuccess(decodedText, decodedResult) {
+            // Sobald ein QR-Code erkannt wird, rufen wir deine Validate-URL auf:
+            window.location.href = "/validate/" + encodeURIComponent(decodedText);
+        }
+
+        const html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start(
+            { facingMode: "environment" }, // Rückkamera auf dem Handy
+            { fps: 10, qrbox: 250 },
+            onScanSuccess
+        );
+    </script>
+</body>
+
+</html>
